@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { Eye, EyeOff, Mail, Lock, User, UserPlus, Sparkles } from 'lucide-react';
 import DevelopmentModal from '@/Components/DevelopmentModal';
 
@@ -8,11 +8,26 @@ export default function Register() {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [showDevModal, setShowDevModal] = useState(false);
 
+    const { data, setData, post, processing, errors } = useForm({
+        name: '',
+        email: '',
+        password: '',
+        password_confirmation: '',
+    });
+
+    const submit = (e) => {
+        e.preventDefault();
+        post(route('register'), {
+            onFinish: () => reset('password', 'password_confirmation'),
+        });
+    };
+
     return (
         <div className="min-h-screen bg-jual-bg text-jual-text-main font-sans selection:bg-jual-green selection:text-white bg-grid-pattern relative flex justify-center items-center p-4">
             <Head title="Register" />
 
             <div className="w-full max-w-[440px] animate-in fade-in zoom-in duration-500">
+
                 {/* Header / Logo */}
                 <div className="mb-4 flex flex-col items-center">
                     <Link href="/" className="flex items-center gap-3 mb-2 group">
@@ -35,7 +50,8 @@ export default function Register() {
                         <p className="text-xs text-slate-400 mt-1 leading-relaxed">Mulai perjalanan bisnis digital Anda hari ini.</p>
                     </div>
 
-                    <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                    <form className="space-y-4" onSubmit={submit}>
+
                         {/* Name Input */}
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-bold text-emerald-500/90 uppercase tracking-widest ml-1">Nama Lengkap</label>
@@ -46,9 +62,13 @@ export default function Register() {
                                 <input
                                     type="text"
                                     placeholder="Nama Anda"
+                                    value={data.name}
+                                    onChange={(e) => setData('name', e.target.value)}
                                     className="w-full bg-[#131d23] border border-[#1f2e36] rounded-xl pl-11 pr-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300"
+                                    required
                                 />
                             </div>
+                            {errors.name && <div className="text-red-500 text-sm mt-1">{errors.name}</div>}
                         </div>
 
                         {/* Email Input */}
@@ -61,9 +81,13 @@ export default function Register() {
                                 <input
                                     type="email"
                                     placeholder="nama@email.com"
+                                    value={data.email}
+                                    onChange={(e) => setData('email', e.target.value)}
                                     className="w-full bg-[#131d23] border border-[#1f2e36] rounded-xl pl-11 pr-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300"
+                                    required
                                 />
                             </div>
+                            {errors.email && <div className="text-red-500 text-sm mt-1">{errors.email}</div>}
                         </div>
 
                         {/* Password Fields Row (to save space) */}
@@ -77,7 +101,10 @@ export default function Register() {
                                     <input
                                         type={showPassword ? "text" : "password"}
                                         placeholder="••••••••"
+                                        value={data.password}
+                                        onChange={(e) => setData('password', e.target.value)}
                                         className="w-full bg-[#131d23] border border-[#1f2e36] rounded-xl pl-11 pr-11 py-2.5 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300"
+                                        required
                                     />
                                     <button
                                         type="button"
@@ -87,7 +114,9 @@ export default function Register() {
                                         {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                                     </button>
                                 </div>
+                                {errors.password && <div className="text-red-500 text-sm mt-1">{errors.password}</div>}
                             </div>
+
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-bold text-emerald-500/90 uppercase tracking-widest ml-1">Konfirmasi</label>
                                 <div className="relative group/input">
@@ -97,7 +126,10 @@ export default function Register() {
                                     <input
                                         type={showConfirmPassword ? "text" : "password"}
                                         placeholder="••••••••"
+                                        value={data.password_confirmation}
+                                        onChange={(e) => setData('password_confirmation', e.target.value)}
                                         className="w-full bg-[#131d23] border border-[#1f2e36] rounded-xl pl-11 pr-11 py-2.5 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300"
+                                        required
                                     />
                                     <button
                                         type="button"
@@ -117,6 +149,9 @@ export default function Register() {
                                     id="terms"
                                     type="checkbox"
                                     className="peer h-4 w-4 cursor-pointer appearance-none rounded border border-[#1f2e36] bg-[#131d23] checked:border-emerald-500 checked:bg-emerald-500 transition-all duration-300"
+                                    checked={data.terms}
+                                    onChange={(e) => setData('terms', e.target.checked)}
+                                    required
                                 />
                                 <span className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-900 opacity-0 peer-checked:opacity-100 transition-opacity">
                                     <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="5">
@@ -132,10 +167,16 @@ export default function Register() {
                         {/* Submit Button */}
                         <button
                             type="submit"
-                            className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-900 font-bold py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(16,185,129,0.2)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.3)] hover:-translate-y-0.5 active:translate-y-0"
+                            disabled={processing}
+                            className={`w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-900 font-bold py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(16,185,129,0.2)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.3)] hover:-translate-y-0.5 active:translate-y-0 ${processing ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
                         >
                             <span>Daftar Sekarang</span>
-                            <UserPlus className="w-4 h-4" />
+                            {processing ? (
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-900"></div>
+                            ) : (
+                                <UserPlus className="w-4 h-4" />
+                            )}
                         </button>
                     </form>
 
@@ -148,7 +189,7 @@ export default function Register() {
                     </div>
 
                     {/* Google Signup */}
-                    <button 
+                    <button
                         type="button"
                         onClick={() => setShowDevModal(true)}
                         className="w-full bg-[#131d23] hover:bg-[#18242b] border border-[#1f2e36] rounded-xl py-2.5 flex items-center justify-center gap-3 transition-all duration-300 group/google"
@@ -173,9 +214,9 @@ export default function Register() {
                     </div>
                 </div>
 
-                <DevelopmentModal 
-                    isOpen={showDevModal} 
-                    onClose={() => setShowDevModal(false)} 
+                <DevelopmentModal
+                    isOpen={showDevModal}
+                    onClose={() => setShowDevModal(false)}
                 />
             </div>
         </div>
