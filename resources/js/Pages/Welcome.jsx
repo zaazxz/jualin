@@ -7,7 +7,7 @@ import Footer from '@/Components/Main/Footer';
 export default function Welcome() {
     return (
         <div className="min-h-screen bg-jual-bg text-jual-text-main font-sans selection:bg-jual-green selection:text-white bg-grid-pattern relative">
-            <Head title="JualMachine - Tingkatkan Konversi Penjualan" />
+            <Head title="Tingkatkan Penjualan dengan AI" />
 
             {/* Navbar */}
             <Navbar />
