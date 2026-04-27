@@ -14,7 +14,12 @@ use Inertia\Inertia;
 |
 */
 
-// Test inertia
+// Welcome page
 Route::get('/', function () {
-    return Inertia::render('Test');
+    return Inertia::render('Welcome');
+});
+
+// Dashboard page
+Route::get('/dashboard', function () {
+    return Inertia::render('Dashboard');
 });

@@ -1,8 +1,24 @@
 @import "tailwindcss";
 
 @theme {
-    --color-dark-base: #0f0f1a;
-    --color-dark-card: #1a1a2e;
-    --color-light-base: #f4f2ff;
-    --color-light-card: #ffffff;
+    /* Base colors */
+    --color-jual-bg: #0A0F1C;
+    --color-jual-card: #131B2F;
+    --color-jual-card-hover: #1A243A;
+    --color-jual-border: #1E293B;
+    
+    /* Brand Accent */
+    --color-jual-green: #00B57A;
+    --color-jual-green-hover: #009A68;
+    
+    /* Text */
+    --color-jual-text-main: #F8FAFC;
+    --color-jual-text-muted: #94A3B8;
+}
+
+@layer utilities {
+    .bg-grid-pattern {
+        background-image: radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+        background-size: 32px 32px;
+    }
 }
