@@ -21,7 +21,10 @@ export default function Preview({ sales }) {
     // Jika ada HTML dinamis dari AI, gunakan itu sebagai layout utama
     if (sales.html_content) {
         return (
-            <div className="min-h-screen bg-white">
+            <div 
+                className="min-h-screen transition-colors duration-500" 
+                style={{ backgroundColor: template.bg_color, color: template.text_color }}
+            >
                 <Head title={content.headline || product_name} />
                 <div dangerouslySetInnerHTML={{ __html: sales.html_content }} />
             </div>

@@ -34,11 +34,28 @@ export default function Sidebar({ isSidebarOpen, toggleSidebar, navItems }) {
                 <nav className="flex-1 py-6 px-3 flex flex-col gap-1 overflow-y-auto">
                     {navItems.map((item) => {
                         const isActive = url === item.href;
+
+                        if (item.isModal) {
+                            return (
+                                <button
+                                    key={item.name}
+                                    onClick={() => {
+                                        if (toggleSidebar) toggleSidebar();
+                                        setShowDevModal(true);
+                                    }}
+                                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-jual-text-muted hover:bg-jual-card hover:text-white transition-colors group w-full text-left"
+                                >
+                                    <item.icon className="w-5 h-5 text-jual-text-muted group-hover:text-white" />
+                                    {item.name}
+                                </button>
+                            );
+                        }
+
                         return (
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                onClick={() => setIsSidebarOpen(false)}
+                                onClick={() => { if (toggleSidebar) toggleSidebar(); }}
                                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors group relative ${isActive
                                     ? 'bg-jual-green/10 text-jual-green font-medium'
                                     : 'text-jual-text-muted hover:bg-jual-card hover:text-white'
