@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SalesController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -45,14 +46,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::delete('/sales/{sales}', [SalesController::class, 'destroy'])->name('sales.destroy');
     Route::post('/sales', [SalesController::class, 'store'])->name('sales.store');
+    Route::put('/sales/{sales}', [SalesController::class, 'update'])->name('sales.update');
 
-    Route::get('/dashboard/ai-generator', function () {
-        return Inertia::render('Dashboard/AiGenerator');
+    Route::get('/dashboard/ai-generator/{sales?}', function (\App\Models\Sales $sales = null) {
+        if ($sales && $sales->user_id !== auth()->id()) abort(403);
+        return Inertia::render('Dashboard/AiGenerator', [
+            'edit_sales' => $sales
+        ]);
     })->name('dashboard.ai-generator');
 
-    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [\App\Http\Controllers\ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
 });
 

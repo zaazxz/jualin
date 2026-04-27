@@ -4,7 +4,7 @@ import { Sparkles, Wand2, MessageSquare, Globe, Zap, Target, PenTool, Loader2, L
 import Layout from '@/Layouts/Dashboard/Layout';
 import axios from 'axios';
 
-export default function AiGenerator() {
+export default function AiGenerator({ edit_sales }) {
     const [step, setStep] = useState('input'); // input, identity, template, preview
     const [isGenerating, setIsGenerating] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -39,14 +39,14 @@ export default function AiGenerator() {
     };
 
     const { data, setData, reset, processing } = useForm({
-        product_name: '',
-        description: '',
-        audience: '',
-        tone: 'Profesional',
-        web_name: '',
-        brand_color: '#10b981',
-        features: '',
-        price: '',
+        product_name: edit_sales?.product_name || '',
+        description: edit_sales?.product_info?.description || '',
+        audience: edit_sales?.product_info?.audience || '',
+        tone: edit_sales?.product_info?.tone || 'Profesional',
+        web_name: edit_sales?.product_info?.web_name || '',
+        brand_color: edit_sales?.product_info?.brand_color || '#10b981',
+        features: edit_sales?.product_info?.features || '',
+        price: edit_sales?.product_info?.price || '',
     });
 
     const handleStartGeneration = async (e) => {
@@ -71,7 +71,15 @@ export default function AiGenerator() {
             setTemplateOptions(result.templates || []);
 
             if (result.templates && result.templates.length > 0) {
-                setSelectedTemplate(result.templates[0]);
+                let initTemplate = result.templates[0];
+                if (edit_sales?.template) {
+                    try {
+                        const parsed = JSON.parse(edit_sales.template);
+                        const matched = result.templates.find(t => t.id === parsed.id || t.id === parsed.ID);
+                        if (matched) initTemplate = matched;
+                    } catch (e) {}
+                }
+                setSelectedTemplate(initTemplate);
             }
 
             setProgress(100);
@@ -87,7 +95,7 @@ export default function AiGenerator() {
     };
 
     const handleSave = () => {
-        router.post(route('sales.store'), {
+        const payload = {
             product_name: data.product_name,
             product_info: {
                 description: data.description,
@@ -101,7 +109,13 @@ export default function AiGenerator() {
             generated_content: previewContent?.copy,
             html_content: previewContent?.html_content,
             template: JSON.stringify(selectedTemplate)
-        });
+        };
+
+        if (edit_sales?.id) {
+            router.put(route('sales.update', edit_sales.id), payload);
+        } else {
+            router.post(route('sales.store'), payload);
+        }
     };
 
     const steps = [

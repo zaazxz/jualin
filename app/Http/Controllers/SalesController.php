@@ -102,6 +102,33 @@ class SalesController extends Controller
     }
 
     /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Sales $sales)
+    {
+        if ($sales->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'product_name' => 'required|string|max:255',
+            'product_info' => 'required|array',
+            'generated_content' => 'nullable|array',
+            'template' => 'nullable|string',
+        ]);
+
+        $sales->update([
+            'product_name' => $validated['product_name'],
+            'product_info' => $validated['product_info'],
+            'generated_content' => $validated['generated_content'] ?? null,
+            'template' => $validated['template'] ?? 'modern',
+            'html_content' => $request->input('html_content'),
+        ]);
+
+        return redirect()->route('dashboard')->with('success', 'Halaman berhasil diperbarui!');
+    }
+
+    /**
      * Display the specified resource (Live Preview).
      */
     public function show($slug)
