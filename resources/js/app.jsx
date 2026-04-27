@@ -17,7 +17,7 @@ createInertiaApp({
             console.error('Inertia root element not found!');
             return;
         }
-        createRoot(el).render(<App {...props}/>)
+        createRoot(el).render(<App {...props} />)
     },
     progress: {
         color: "#7C3AED"

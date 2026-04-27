@@ -1,72 +1,42 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { Sparkles, Heart, Activity, CheckCircle2 } from 'lucide-react';
+import Navbar from '@/Components/Main/Navbar';
+import Footer from '@/Components/Main/Footer';
 
 export default function Welcome() {
     return (
         <div className="min-h-screen bg-jual-bg text-jual-text-main font-sans selection:bg-jual-green selection:text-white bg-grid-pattern relative">
             <Head title="JualMachine - Tingkatkan Konversi Penjualan" />
-            
+
             {/* Navbar */}
-            <nav className="fixed w-full z-50 top-0 left-0 bg-jual-bg/80 backdrop-blur-md border-b border-jual-border">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-20">
-                        {/* Logo */}
-                        <div className="flex-shrink-0 flex items-center">
-                            <span className="text-2xl font-bold italic tracking-tight">
-                                <span className="text-jual-green">Jual</span>
-                                <span className="text-jual-text-main">Machine</span>
-                            </span>
-                        </div>
-                        
-                        {/* Navigation */}
-                        <div className="hidden md:flex space-x-8 text-sm font-medium text-jual-text-muted">
-                            <a href="#" className="hover:text-jual-green transition-colors">Features</a>
-                            <a href="#" className="hover:text-jual-green transition-colors">Methodology</a>
-                            <a href="#" className="hover:text-jual-green transition-colors">Showcase</a>
-                            <a href="#" className="hover:text-jual-green transition-colors">Pricing</a>
-                        </div>
-                        
-                        {/* Actions */}
-                        <div className="flex items-center space-x-4">
-                            <a href="#" className="text-sm font-medium hover:text-white transition-colors">Login</a>
-                            <Link 
-                                href="/dashboard" 
-                                className="bg-jual-green hover:bg-jual-green-hover text-white text-sm font-semibold py-2 px-5 rounded-md transition-all shadow-[0_0_15px_rgba(0,181,122,0.3)] hover:shadow-[0_0_20px_rgba(0,181,122,0.5)]"
-                            >
-                                Get Started
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+            <Navbar />
 
             {/* Hero Section */}
-            <div className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center mt-10">
+            <div className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center">
                 <div className="inline-flex items-center space-x-2 bg-jual-card border border-jual-border rounded-full px-4 py-1.5 mb-8">
                     <Sparkles className="w-4 h-4 text-[#FDE047]" />
-                    <span className="text-xs font-semibold tracking-wider text-[#FDE047]">THE FUTURE OF E-COMMERCE</span>
+                    <span className="text-xs font-semibold tracking-wider text-[#FDE047]">THE FUTURE OF SALES</span>
                 </div>
-                
+
                 <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 leading-tight">
-                    Tingkatkan Konversi Penjualan Anda<br />
-                    dengan <span className="text-jual-green italic">Barakah AI</span>
+                    Tingkatkan Konversi Penjualan Anda dengan <span className="text-jual-green italic">Artificial Intelligence</span>
                 </h1>
-                
+
                 <p className="mt-4 text-lg text-jual-text-muted max-w-2xl mx-auto mb-10 leading-relaxed">
-                    JualMachine membantu Anda membuat halaman jualan yang memikat dan 
+                    <span className="text-jual-green">Jual.in</span> membantu Anda membuat halaman jualan yang memikat dan
                     profesional dalam hitungan detik. Gabungkan teknologi cerdas dan etika bisnis.
                 </p>
-                
+
                 <div className="flex justify-center gap-4">
-                    <Link 
+                    <Link
                         href="/dashboard"
                         className="bg-jual-green hover:bg-jual-green-hover text-white font-semibold py-3 px-8 rounded-md transition-all shadow-[0_0_15px_rgba(0,181,122,0.3)] hover:shadow-[0_0_25px_rgba(0,181,122,0.5)]"
                     >
                         Mulai Sekarang
                     </Link>
-                    <a 
-                        href="#features" 
+                    <a
+                        href="/#features"
                         className="border border-jual-border hover:border-jual-green text-jual-text-main hover:text-jual-green font-semibold py-3 px-8 rounded-md transition-all bg-jual-card/50 backdrop-blur-sm"
                     >
                         Pelajari Fitur
@@ -92,7 +62,7 @@ export default function Welcome() {
                             </div>
                             <h3 className="text-lg font-semibold mb-3">Salinan Persuasif</h3>
                             <p className="text-sm text-jual-text-muted leading-relaxed">
-                                AI Copywriting kami dilatih untuk menghasilkan narasi yang menyentuh 
+                                AI Copywriting kami dilatih untuk menghasilkan narasi yang menyentuh
                                 emosi pembeli sekaligus menjaga kejujuran informasi.
                             </p>
                         </div>
@@ -107,7 +77,7 @@ export default function Welcome() {
                             </div>
                             <h3 className="text-lg font-semibold mb-3">Desain Modern</h3>
                             <p className="text-sm text-jual-text-muted leading-relaxed">
-                                Template mewah dengan sentuhan estetika minimalis dan motif 
+                                Template mewah dengan sentuhan estetika minimalis dan motif
                                 geometris yang memberikan kesan eksklusif dan terpercaya.
                             </p>
                         </div>
@@ -120,7 +90,7 @@ export default function Welcome() {
                             </div>
                             <h3 className="text-lg font-semibold mb-3">Optimasi Konversi</h3>
                             <p className="text-sm text-jual-text-muted leading-relaxed">
-                                Setiap elemen diletakkan berdasarkan data perilaku pengguna untuk 
+                                Setiap elemen diletakkan berdasarkan data perilaku pengguna untuk
                                 memastikan perjalanan pembeli yang lancar dan cepat.
                             </p>
                         </div>
@@ -129,7 +99,7 @@ export default function Welcome() {
             </div>
 
             {/* Showcase Section */}
-            <div className="py-24 bg-[#0d1322] border-y border-jual-border/50">
+            <div id="showcase" className="py-24 bg-[#0d1322] border-y border-jual-border/50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col lg:flex-row items-center gap-16">
                         {/* Image Placeholder */}
@@ -144,13 +114,13 @@ export default function Welcome() {
 
                         {/* Content */}
                         <div className="w-full lg:w-1/2">
-                            <h2 className="text-3xl font-bold italic mb-6 text-white">Bismillah, Strategi yang Terukur</h2>
+                            <h2 className="text-3xl font-bold italic mb-6 text-white">Strategi yang Terukur</h2>
                             <p className="text-jual-text-muted mb-8 text-sm leading-relaxed">
-                                Kami percaya bahwa keberhasilan dimulai dengan niat yang baik dan proses 
-                                yang presisi. JualMachine menggunakan mesin AI yang dikalibrasi untuk 
+                                Kami percaya bahwa keberhasilan dimulai dengan niat yang baik dan proses
+                                yang presisi. Jual.In menggunakan mesin AI yang dikalibrasi untuk
                                 memahami nuansa psikologi konsumen modern.
                             </p>
-                            
+
                             <div className="space-y-6">
                                 <div className="flex gap-4">
                                     <div className="mt-1 flex-shrink-0">
@@ -180,9 +150,10 @@ export default function Welcome() {
             <div className="py-24 bg-jual-bg">
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h2 className="text-2xl font-bold text-white mb-16">Visualisasi Kesuksesan Anda</h2>
-                    
+
                     {/* Browser Mockup */}
                     <div className="bg-jual-card border border-jual-border rounded-xl overflow-hidden shadow-2xl mx-auto max-w-full">
+
                         {/* Browser Header */}
                         <div className="bg-[#1e293b] border-b border-jual-border px-3 md:px-4 py-2 md:py-3 flex items-center gap-1.5 md:gap-2">
                             <div className="flex gap-1.5 md:gap-2 shrink-0">
@@ -191,8 +162,8 @@ export default function Welcome() {
                                 <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-green-500"></div>
                             </div>
                             <div className="ml-2 md:ml-4 bg-jual-bg text-[10px] md:text-xs text-jual-text-muted px-2 md:px-4 py-1 md:py-1.5 rounded-md flex-1 text-left flex items-center gap-1.5 md:gap-2 max-w-sm overflow-hidden">
-                                <span>🔒</span> 
-                                <span className="truncate">https://app.jualmachine.com/builder</span>
+                                <span>🔒</span>
+                                <span className="truncate">https://app.jual.in/builder</span>
                             </div>
                         </div>
                         {/* Browser Content Mock */}
@@ -228,44 +199,28 @@ export default function Welcome() {
             </div>
 
             {/* Bottom CTA */}
-            <div className="py-20 px-4 sm:px-6 lg:px-8">
+            <div id="get-started" className="py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-4xl mx-auto bg-gradient-to-br from-[#131b2f] to-[#0a0f1c] border border-jual-border rounded-2xl p-12 text-center shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-jual-green to-transparent"></div>
-                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Siap Untuk Sukses Bersama JualMachine?</h2>
+                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Siap Untuk Sukses Bersama <span className="text-jual-green">Jual</span>.In ? </h2>
                     <p className="text-sm text-jual-text-muted max-w-xl mx-auto mb-10 leading-relaxed">
-                        Bergabunglah dengan ribuan pengusaha yang telah meningkatkan konversi 
+                        Bergabunglah dengan ribuan pengusaha yang telah meningkatkan konversi
                         mereka hingga 300% dengan bantuan kecerdasan buatan.
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                        <Link 
+                        <Link
                             href="/dashboard"
                             className="bg-jual-green hover:bg-jual-green-hover text-white font-semibold py-3 px-10 rounded-md transition-all shadow-[0_0_15px_rgba(0,181,122,0.3)]"
                         >
                             Coba Gratis
                         </Link>
-                        <span className="text-xs tracking-widest text-jual-text-muted uppercase">Tanpa Kartu Kredit</span>
                     </div>
                 </div>
             </div>
 
             {/* Footer */}
-            <footer className="border-t border-jual-border py-8 bg-[#0a0f1c]">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-jual-text-muted">
-                    <div>
-                        <span className="font-bold italic tracking-tight text-lg mb-1 block">
-                            <span className="text-jual-green">Jual</span>
-                            <span className="text-white">Machine</span>
-                        </span>
-                        <p>© 2023 JualMachine. Crafted by Anak Bangsa for Global Ummah.</p>
-                    </div>
-                    <div className="flex gap-6 uppercase tracking-wider">
-                        <a href="#" className="hover:text-jual-green transition-colors">Privacy Policy</a>
-                        <a href="#" className="hover:text-jual-green transition-colors">Terms of Service</a>
-                        <a href="#" className="hover:text-jual-green transition-colors">Islam & IT Web 3.0 Compliance</a>
-                        <a href="#" className="hover:text-jual-green transition-colors">Contact Support</a>
-                    </div>
-                </div>
-            </footer>
+            <Footer />
+
         </div>
     );
 }
