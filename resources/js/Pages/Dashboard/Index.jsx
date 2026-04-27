@@ -1,11 +1,11 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import DashboardLayout from '../Layouts/DashboardLayout';
 import { Rocket, FileText, Calendar, Clock, Eye, ShoppingCart, Plus, MoreVertical, ExternalLink, Sparkles, User } from 'lucide-react';
+import Layout from '@/Layouts/Dashboard/Layout';
 
 export default function Dashboard() {
     return (
-        <DashboardLayout>
+        <Layout>
             <Head title="Dashboard" />
 
             {/* Welcome Banner */}
@@ -16,7 +16,7 @@ export default function Dashboard() {
                         Bismillah, Mari Mulai Jualan <Rocket className="w-8 h-8 text-jual-green fill-jual-green/20" />
                     </h1>
                     <p className="text-sm text-jual-text-muted max-w-xl mb-6 leading-relaxed">
-                        Bangun halaman penjualan yang elegan dan berkonversi tinggi hanya dalam 
+                        Bangun halaman penjualan yang elegan dan berkonversi tinggi hanya dalam
                         hitungan menit dengan bantuan AI kami yang canggih.
                     </p>
                     <button className="bg-jual-green hover:bg-jual-green-hover text-white font-medium py-2.5 px-6 rounded-md transition-all shadow-[0_0_15px_rgba(0,181,122,0.3)] hover:shadow-[0_0_20px_rgba(0,181,122,0.5)] flex items-center gap-2">
@@ -102,7 +102,7 @@ export default function Dashboard() {
                                 <span className="bg-jual-green/20 text-jual-green text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase">Published</span>
                             </div>
                             <p className="text-xs text-jual-text-muted mb-4">Target: High-end lifestyle enthusiasts</p>
-                            
+
                             <div className="flex gap-4 mb-4">
                                 <div className="flex items-center gap-1.5 text-xs text-jual-text-muted">
                                     <Eye className="w-4 h-4" /> 1.2k Views
@@ -131,7 +131,7 @@ export default function Dashboard() {
                             <button className="text-jual-text-muted hover:text-white"><MoreVertical className="w-4 h-4" /></button>
                         </div>
                         <p className="text-[10px] text-jual-text-muted mb-4">Dibuat: 12 Okt 2023</p>
-                        
+
                         <div className="mb-2">
                             <div className="h-1.5 w-full bg-[#1e293b] rounded-full overflow-hidden">
                                 <div className="h-full bg-emerald-500 w-[65%]"></div>
@@ -142,7 +142,7 @@ export default function Dashboard() {
                             <span className="text-emerald-500 font-medium">65%</span>
                         </div>
                     </div>
-                    
+
                     <button className="w-full mt-4 bg-[#1e293b] hover:bg-jual-green text-xs font-medium text-white hover:text-white px-4 py-2 rounded transition-colors border border-jual-border hover:border-jual-green">
                         Selesaikan Draft
                     </button>
@@ -195,6 +195,6 @@ export default function Dashboard() {
                 <Sparkles className="w-16 h-16 text-white/5" />
             </div>
 
-        </DashboardLayout>
+        </Layout>
     );
 }

@@ -30,7 +30,11 @@ Route::get('/register', function () {
 })->name('register');
 
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+    return Inertia::render('Dashboard/Index');
+})->name('dashboard');
 
-require __DIR__.'/auth.php';
+// Route::get('/dashboard', function () {
+//     return Inertia::render('Dashboard');
+// })->middleware(['auth', 'verified'])->name('dashboard');
+
+// require __DIR__.'/auth.php';
