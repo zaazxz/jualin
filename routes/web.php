@@ -40,6 +40,7 @@ Route::get('/p/{slug}', [SalesController::class, 'show'])->name('sales.preview')
 Route::middleware(['auth', 'verified'])->group(function () {
     
     Route::get('/dashboard', [SalesController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/projects', [SalesController::class, 'projects'])->name('dashboard.projects');
     Route::post('/sales/generate', [SalesController::class, 'generate'])->name('sales.generate');
 
     Route::delete('/sales/{sales}', [SalesController::class, 'destroy'])->name('sales.destroy');
@@ -49,17 +50,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('Dashboard/AiGenerator');
     })->name('dashboard.ai-generator');
 
-    Route::get('/dashboard/templates', function () {
-        return Inertia::render('Dashboard/Templates');
-    })->name('dashboard.templates');
-
-    Route::get('/dashboard/analytics', function () {
-        return Inertia::render('Dashboard/Analytics');
-    })->name('dashboard.analytics');
-
-    Route::get('/dashboard/settings', function () {
-        return Inertia::render('Dashboard/Settings');
-    })->name('dashboard.settings');
+    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [\App\Http\Controllers\ProfileController::class, 'destroy'])->name('profile.destroy');
 
 });
 

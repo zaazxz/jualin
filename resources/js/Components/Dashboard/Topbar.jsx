@@ -19,14 +19,14 @@ export default function Topbar({ toggleSidebar }) {
                         <Menu className="w-6 h-6" />
                     </button>
                     <div className="text-sm font-medium text-slate-300 hidden sm:flex items-center gap-2">
-                        <span className="text-jual-text-muted">Assalamu'alaikum,</span> 
+                        <span className="text-jual-text-muted">Halo,</span>
                         <span className="text-white">{auth.user.name}</span>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-3 lg:gap-5">
                     {/* Dark Mode Toggle */}
-                    <button 
+                    <button
                         onClick={() => setShowDevModal(true)}
                         className="text-jual-text-muted hover:text-emerald-400 transition-colors p-2 hover:bg-jual-card rounded-lg"
                     >
@@ -34,7 +34,7 @@ export default function Topbar({ toggleSidebar }) {
                     </button>
 
                     {/* Notifications */}
-                    <button 
+                    <button
                         onClick={() => setShowDevModal(true)}
                         className="text-jual-text-muted hover:text-emerald-400 transition-colors relative p-2 hover:bg-jual-card rounded-lg"
                     >
@@ -44,7 +44,7 @@ export default function Topbar({ toggleSidebar }) {
 
                     {/* User Profile Dropdown */}
                     <div className="relative">
-                        <button 
+                        <button
                             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                             className="flex items-center gap-3 pl-2 pr-1 py-1 rounded-xl hover:bg-jual-card border border-transparent hover:border-jual-border transition-all duration-300 group"
                         >
@@ -53,7 +53,7 @@ export default function Topbar({ toggleSidebar }) {
                             </div>
                             <div className="hidden md:block text-left mr-1">
                                 <p className="text-xs font-bold text-white leading-none">{auth.user.name}</p>
-                                <p className="text-[10px] text-jual-text-muted mt-1 leading-none">Pro Plan</p>
+                                <p className="text-[10px] text-jual-text-muted mt-1 leading-none">Member</p>
                             </div>
                             <ChevronDown className={`w-4 h-4 text-jual-text-muted transition-transform duration-300 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
                         </button>
@@ -61,8 +61,8 @@ export default function Topbar({ toggleSidebar }) {
                         {/* Dropdown Menu */}
                         {isUserMenuOpen && (
                             <>
-                                <div 
-                                    className="fixed inset-0 z-10" 
+                                <div
+                                    className="fixed inset-0 z-10"
                                     onClick={() => setIsUserMenuOpen(false)}
                                 ></div>
                                 <div className="absolute right-0 mt-3 w-56 bg-[#0f171c] border border-jual-border rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden z-20 animate-in fade-in slide-in-from-top-2 duration-200">
@@ -71,7 +71,7 @@ export default function Topbar({ toggleSidebar }) {
                                         <p className="text-sm text-white mt-1 truncate">{auth.user.email}</p>
                                     </div>
                                     <div className="p-2">
-                                        <Link href="#" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-300 hover:bg-emerald-500/10 hover:text-emerald-400 transition-colors group">
+                                        <Link href={route('profile.edit')} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-300 hover:bg-emerald-500/10 hover:text-emerald-400 transition-colors group">
                                             <Settings className="w-4 h-4 text-slate-500 group-hover:text-emerald-400" />
                                             Pengaturan
                                         </Link>
@@ -81,10 +81,10 @@ export default function Topbar({ toggleSidebar }) {
                                         </Link>
                                     </div>
                                     <div className="p-2 border-t border-jual-border">
-                                        <Link 
-                                            href={route('logout')} 
-                                            method="post" 
-                                            as="button" 
+                                        <Link
+                                            href={route('logout')}
+                                            method="post"
+                                            as="button"
                                             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-400 hover:bg-red-500/10 transition-colors group text-left"
                                         >
                                             <LogOut className="w-4 h-4" />
@@ -98,9 +98,9 @@ export default function Topbar({ toggleSidebar }) {
                 </div>
             </header>
 
-            <DevelopmentModal 
-                isOpen={showDevModal} 
-                onClose={() => setShowDevModal(false)} 
+            <DevelopmentModal
+                isOpen={showDevModal}
+                onClose={() => setShowDevModal(false)}
             />
         </>
     )

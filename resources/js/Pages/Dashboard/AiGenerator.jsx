@@ -1,23 +1,50 @@
 import React, { useState } from 'react';
 import { Head, useForm, router, Link } from '@inertiajs/react';
-import { Sparkles, Wand2, MessageSquare, Globe, Zap, Target, PenTool, Loader2, LayoutTemplate, Eye, ExternalLink, CheckCircle2, Palette, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Sparkles, Wand2, MessageSquare, Globe, Zap, Target, PenTool, Loader2, LayoutTemplate, Eye, ExternalLink, CheckCircle2, Palette, ArrowRight, ArrowLeft, Download } from 'lucide-react';
 import Layout from '@/Layouts/Dashboard/Layout';
 import axios from 'axios';
 
 export default function AiGenerator() {
     const [step, setStep] = useState('input'); // input, identity, template, preview
     const [isGenerating, setIsGenerating] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const [progressText, setProgressText] = useState('');
     const [previewContent, setPreviewContent] = useState(null);
     const [templateOptions, setTemplateOptions] = useState([]);
     const [selectedTemplate, setSelectedTemplate] = useState(null);
+
+    const simulateProgress = () => {
+        setProgress(0);
+        const intervals = [
+            { threshold: 30, text: 'Menganalisis produk...', speed: 200 },
+            { threshold: 60, text: 'Menyusun layout kreatif...', speed: 300 },
+            { threshold: 85, text: 'Memilih palet warna...', speed: 400 },
+            { threshold: 95, text: 'Finalisasi desain...', speed: 500 },
+        ];
+
+        let currentIdx = 0;
+        const timer = setInterval(() => {
+            setProgress(prev => {
+                if (prev >= 98) {
+                    return 98;
+                }
+                if (prev >= intervals[currentIdx].threshold && currentIdx < intervals.length - 1) {
+                    currentIdx++;
+                }
+                setProgressText(intervals[currentIdx].text);
+                return prev + 0.2;
+            });
+        }, 100);
+        return timer;
+    };
 
     const { data, setData, reset, processing } = useForm({
         product_name: '',
         description: '',
         audience: '',
-        tone: 'Profesional & Percaya Diri',
+        tone: 'Profesional',
         web_name: '',
-        brand_color: '#10b981', // Default emerald
+        brand_color: '#10b981',
         features: '',
         price: '',
     });
@@ -25,6 +52,7 @@ export default function AiGenerator() {
     const handleStartGeneration = async (e) => {
         if (e) e.preventDefault();
         setIsGenerating(true);
+        const progressTimer = simulateProgress();
 
         try {
             const response = await axios.post(route('sales.generate'), {
@@ -33,41 +61,45 @@ export default function AiGenerator() {
                 audience: data.audience,
                 tone: data.tone,
                 web_name: data.web_name,
-                brand_color: data.brand_color
+                brand_color: data.brand_color,
+                features: data.features,
+                price: data.price
             });
 
             const result = response.data;
-            setPreviewContent(result); // Simpan seluruh objek termasuk html_content
+            setPreviewContent(result);
             setTemplateOptions(result.templates || []);
-            
-            // Auto-select first template
+
             if (result.templates && result.templates.length > 0) {
                 setSelectedTemplate(result.templates[0]);
             }
 
-            setStep('template');
+            setProgress(100);
+            setTimeout(() => setStep('template'), 500);
         } catch (error) {
             console.error('Generation failed:', error);
-            alert('Maaf, terjadi kesalahan saat menghubungi AI. Silakan coba lagi.');
+            const errorMsg = error.response?.data?.error || error.message;
+            alert(`Gagal Generate: ${errorMsg}`);
         } finally {
             setIsGenerating(false);
+            clearInterval(progressTimer);
         }
     };
 
-    const handleSaveAndPublish = () => {
+    const handleSave = () => {
         router.post(route('sales.store'), {
             product_name: data.product_name,
             product_info: {
                 description: data.description,
                 audience: data.audience,
                 tone: data.tone,
-                web_name: data.web_name || previewContent?.web_name,
+                web_name: data.web_name || previewContent?.copy?.web_name,
                 brand_color: data.brand_color,
                 features: data.features,
                 price: data.price
             },
             generated_content: previewContent?.copy,
-            html_content: previewContent?.html_content, // Tambahkan ini
+            html_content: previewContent?.html_content,
             template: JSON.stringify(selectedTemplate)
         });
     };
@@ -76,7 +108,7 @@ export default function AiGenerator() {
         { id: 'input', label: 'Info Produk' },
         { id: 'identity', label: 'Identitas Web' },
         { id: 'template', label: 'Pilih Template' },
-        { id: 'preview', label: 'Preview & Simpan' }
+        { id: 'preview', label: 'Download' }
     ];
 
     const currentStepIndex = steps.findIndex(s => s.id === step);
@@ -91,10 +123,9 @@ export default function AiGenerator() {
                     {steps.map((s, i) => (
                         <React.Fragment key={s.id}>
                             <div className="flex flex-col items-center gap-2 min-w-fit">
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-500 ${
-                                    step === s.id ? 'bg-emerald-500 text-slate-900 scale-110 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 
-                                    (i < currentStepIndex ? 'bg-emerald-500/20 text-emerald-500' : 'bg-jual-card border border-jual-border text-slate-500')
-                                }`}>
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-500 ${step === s.id ? 'bg-emerald-500 text-slate-900 scale-110 shadow-[0_0_20px_rgba(16,185,129,0.3)]' :
+                                        (i < currentStepIndex ? 'bg-emerald-500/20 text-emerald-500' : 'bg-jual-card border border-jual-border text-slate-500')
+                                    }`}>
                                     {i < currentStepIndex ? <CheckCircle2 className="w-5 h-5" /> : i + 1}
                                 </div>
                                 <span className={`text-[10px] font-bold uppercase tracking-widest ${step === s.id ? 'text-white' : 'text-slate-600'}`}>{s.label}</span>
@@ -110,12 +141,12 @@ export default function AiGenerator() {
                             <div className="bg-jual-card border border-jual-border rounded-3xl p-8 relative overflow-hidden group">
                                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-cyan-500"></div>
                                 <h1 className="text-2xl font-bold text-white mb-8">Apa yang ingin Anda jual?</h1>
-                                
+
                                 <div className="space-y-6">
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest ml-1">Nama Produk</label>
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             value={data.product_name}
                                             onChange={e => setData('product_name', e.target.value)}
                                             placeholder="Contoh: Kantong Kresek Organik"
@@ -124,9 +155,9 @@ export default function AiGenerator() {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest ml-1">Deskripsi & Keunggulan</label>
-                                        <textarea 
-                                            rows="4"
+                                        <label className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest ml-1">Deskripsi Singkat</label>
+                                        <textarea
+                                            rows="2"
                                             value={data.description}
                                             onChange={e => setData('description', e.target.value)}
                                             placeholder="Ceritakan detail produk Anda..."
@@ -134,20 +165,41 @@ export default function AiGenerator() {
                                             required
                                         ></textarea>
                                     </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest ml-1">Fitur Utama & USP (Pisahkan Koma)</label>
+                                        <textarea
+                                            rows="2"
+                                            value={data.features}
+                                            onChange={e => setData('features', e.target.value)}
+                                            placeholder="Contoh: Anti air, Garansi 1 Tahun, Desain Eksklusif"
+                                            className="w-full bg-[#131d23] border border-[#1f2e36] rounded-xl px-5 py-4 text-sm text-slate-200 resize-none focus:outline-none focus:border-emerald-500/50 transition-all"
+                                            required
+                                        ></textarea>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest ml-1">Harga</label>
+                                            <input
+                                                type="text"
+                                                value={data.price}
+                                                onChange={e => setData('price', e.target.value)}
+                                                placeholder="Contoh: Rp 99.000"
+                                                className="w-full bg-[#131d23] border border-[#1f2e36] rounded-xl px-5 py-4 text-sm text-slate-200 focus:outline-none focus:border-emerald-500/50 transition-all"
+                                            />
+                                        </div>
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest ml-1">Target Pembeli</label>
-                                            <input 
-                                                type="text" 
+                                            <input
+                                                type="text"
                                                 value={data.audience}
                                                 onChange={e => setData('audience', e.target.value)}
-                                                placeholder="Contoh: Ibu Rumah Tangga"
+                                                placeholder="Contoh: Anak Muda"
                                                 className="w-full bg-[#131d23] border border-[#1f2e36] rounded-xl px-5 py-4 text-sm text-slate-200 focus:outline-none focus:border-emerald-500/50 transition-all"
                                             />
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest ml-1">Tone Copywriting</label>
-                                            <select 
+                                            <select
                                                 value={data.tone}
                                                 onChange={e => setData('tone', e.target.value)}
                                                 className="w-full bg-[#131d23] border border-[#1f2e36] rounded-xl px-5 py-4 text-sm text-slate-200 focus:outline-none focus:border-emerald-500/50 transition-all appearance-none"
@@ -162,7 +214,7 @@ export default function AiGenerator() {
                                 </div>
 
                                 <div className="mt-10 flex justify-end">
-                                    <button 
+                                    <button
                                         onClick={() => setStep('identity')}
                                         disabled={!data.product_name || !data.description}
                                         className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-4 px-12 rounded-2xl transition-all flex items-center gap-3 shadow-lg disabled:opacity-50"
@@ -189,15 +241,15 @@ export default function AiGenerator() {
                                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-cyan-500"></div>
                                 <h1 className="text-2xl font-bold text-white mb-2">Identitas Landing Page</h1>
                                 <p className="text-slate-500 text-sm mb-8">Tentukan bagaimana brand Anda ingin dilihat.</p>
-                                
+
                                 <div className="space-y-8">
                                     <div className="space-y-2">
                                         <div className="flex justify-between items-center">
                                             <label className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest ml-1">Nama Website / Brand</label>
                                             <span className="text-[10px] text-slate-500">Opsional (AI akan buatkan jika kosong)</span>
                                         </div>
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             value={data.web_name}
                                             onChange={e => setData('web_name', e.target.value)}
                                             placeholder="Contoh: Madep Store / OrganicBag"
@@ -209,7 +261,7 @@ export default function AiGenerator() {
                                         <label className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest ml-1">Warna Brand Utama</label>
                                         <div className="flex flex-wrap gap-3">
                                             {['#10b981', '#3b82f6', '#ef4444', '#f59e0b', '#8b5cf6', '#ec4899'].map(color => (
-                                                <button 
+                                                <button
                                                     key={color}
                                                     onClick={() => setData('brand_color', color)}
                                                     className={`w-12 h-12 rounded-2xl border-2 transition-all ${data.brand_color === color ? 'border-white scale-110 shadow-lg' : 'border-transparent opacity-50 hover:opacity-100'}`}
@@ -217,8 +269,8 @@ export default function AiGenerator() {
                                                 />
                                             ))}
                                             <div className="relative">
-                                                <input 
-                                                    type="color" 
+                                                <input
+                                                    type="color"
                                                     value={data.brand_color}
                                                     onChange={e => setData('brand_color', e.target.value)}
                                                     className="w-12 h-12 rounded-2xl cursor-pointer bg-transparent border-none"
@@ -228,21 +280,6 @@ export default function AiGenerator() {
                                                 </div>
                                             </div>
                                         </div>
-                                        <p className="text-[10px] text-slate-600 italic">Warna ini akan menjadi aksen utama (tombol, ikon, dll) pada landing page Anda.</p>
-                                    </div>
-
-                                    <div className="bg-emerald-500/5 rounded-2xl p-6 border border-emerald-500/10">
-                                        <div className="flex gap-4 items-start">
-                                            <div className="bg-emerald-500/20 p-2 rounded-xl">
-                                                <Wand2 className="w-5 h-5 text-emerald-500" />
-                                            </div>
-                                            <div>
-                                                <h4 className="text-sm font-bold text-white mb-1">Gambar Produk AI</h4>
-                                                <p className="text-xs text-slate-500 leading-relaxed">
-                                                    Kami akan menyertakan gambar hero berkualitas tinggi dari Unsplash yang paling cocok dengan deskripsi produk Anda.
-                                                </p>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
 
@@ -250,21 +287,29 @@ export default function AiGenerator() {
                                     <button onClick={() => setStep('input')} className="flex items-center gap-2 text-slate-500 hover:text-white transition-all font-bold text-sm">
                                         <ArrowLeft className="w-4 h-4" /> Kembali
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={handleStartGeneration}
                                         disabled={isGenerating}
-                                        className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-4 px-12 rounded-2xl transition-all flex items-center gap-3 shadow-lg disabled:opacity-50"
+                                        className={`relative overflow-hidden h-[56px] w-[240px] transition-all duration-300 ${isGenerating ? 'bg-slate-800' : 'bg-emerald-500 hover:bg-emerald-400'} text-slate-900 font-bold rounded-xl flex items-center justify-center gap-3 shadow-lg disabled:opacity-100`}
                                     >
-                                        {isGenerating ? <>Memanggil Gemini... <Loader2 className="animate-spin w-4 h-4" /></> : <>Generate Sekarang <Sparkles className="w-4 h-4" /></>}
+                                        {isGenerating ? (
+                                            <div className="w-full px-6 flex flex-col items-center gap-1">
+                                                <div className="w-full flex justify-between items-center text-emerald-500 text-[9px] font-black uppercase tracking-tighter">
+                                                    <span className="truncate">{progressText}</span>
+                                                    <span>{Math.round(progress)}%</span>
+                                                </div>
+                                                <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                                                    <div
+                                                        className="h-full bg-emerald-500 transition-all duration-300 ease-out"
+                                                        style={{ width: `${progress}%` }}
+                                                    ></div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <>Generate Sekarang <Sparkles className="w-4 h-4" /></>
+                                        )}
                                     </button>
                                 </div>
-                            </div>
-                        </div>
-                        <div className="hidden lg:block w-1/3">
-                            <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-3xl p-8 sticky top-8">
-                                <Globe className="w-8 h-8 text-emerald-500 mb-4" />
-                                <h3 className="text-white font-bold mb-2">Langkah 2</h3>
-                                <p className="text-xs text-slate-400 leading-relaxed">Identitas web menentukan impresi pertama pengunjung. Gunakan warna yang mencerminkan psikologi produk Anda.</p>
                             </div>
                         </div>
                     </div>
@@ -278,14 +323,13 @@ export default function AiGenerator() {
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {templateOptions.map((t) => (
-                                <div 
+                                <div
                                     key={t.id}
                                     onClick={() => setSelectedTemplate(t)}
-                                    className={`cursor-pointer rounded-3xl p-6 border-2 transition-all duration-300 relative overflow-hidden group ${
-                                        selectedTemplate?.id === t.id ? 'border-emerald-500 bg-emerald-500/5' : 'border-jual-border bg-jual-card hover:border-emerald-500/30'
-                                    }`}
+                                    className={`cursor-pointer rounded-3xl p-6 border-2 transition-all duration-300 relative overflow-hidden group ${selectedTemplate?.id === t.id ? 'border-emerald-500 bg-emerald-500/5' : 'border-jual-border bg-jual-card hover:border-emerald-500/30'
+                                        }`}
                                 >
-                                    <div 
+                                    <div
                                         className="aspect-video rounded-2xl mb-6 flex flex-col items-center justify-center relative z-10"
                                         style={{ backgroundColor: t.bg_color, color: t.text_color }}
                                     >
@@ -295,13 +339,6 @@ export default function AiGenerator() {
                                     <div className="relative z-10">
                                         <h3 className="text-white font-bold mb-1">{t.name}</h3>
                                         <p className="text-xs text-slate-500 leading-relaxed">{t.desc}</p>
-                                    </div>
-                                    
-                                    {/* Color Indicator Dots */}
-                                    <div className="mt-4 flex gap-2">
-                                        <div className="w-3 h-3 rounded-full border border-white/10" style={{ backgroundColor: t.bg_color }}></div>
-                                        <div className="w-3 h-3 rounded-full border border-white/10" style={{ backgroundColor: data.brand_color || t.accent_color }}></div>
-                                        <div className="w-3 h-3 rounded-full border border-white/10" style={{ backgroundColor: t.text_color }}></div>
                                     </div>
                                 </div>
                             ))}
@@ -322,96 +359,40 @@ export default function AiGenerator() {
                             </div>
                             <div className="flex gap-4">
                                 <button onClick={() => setStep('template')} className="px-6 py-3 border border-jual-border rounded-xl text-white font-bold text-sm hover:bg-white/5 transition-all">Ganti Desain</button>
-                                <button 
-                                    onClick={handleSaveAndPublish} 
+                                <button
+                                    onClick={handleSave}
                                     disabled={processing}
-                                    className="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold rounded-xl transition-all shadow-lg flex items-center gap-2 disabled:opacity-50"
+                                    className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 px-8 py-3 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg transition-all disabled:opacity-50"
                                 >
-                                    {processing ? 'Menyimpan...' : 'Simpan & Publish'} <ExternalLink className="w-4 h-4" />
+                                    {processing ? 'Menyimpan...' : 'Simpan Hasil'} <ArrowRight className="w-4 h-4" />
                                 </button>
                             </div>
                         </div>
 
-                        {/* Iframe-like Preview Window */}
-                        <div 
-                            className="rounded-3xl overflow-hidden border-[12px] border-jual-card shadow-2xl relative group"
-                            style={{ backgroundColor: selectedTemplate?.bg_color || '#ffffff' }}
-                        >
-                            <div className="bg-slate-100/10 backdrop-blur-md px-6 py-3 flex items-center justify-between border-b border-black/5">
+                        {/* Browser Window Mockup */}
+                        <div className="rounded-3xl overflow-hidden border-[12px] border-jual-card shadow-2xl relative transition-colors duration-500" style={{ backgroundColor: selectedTemplate?.bg_color || '#ffffff' }}>
+                            <div className="bg-slate-100 px-6 py-3 flex items-center justify-between border-b border-black/5">
                                 <div className="flex gap-1.5">
-                                    <div className="w-3 h-3 rounded-full bg-red-400/50"></div>
-                                    <div className="w-3 h-3 rounded-full bg-amber-400/50"></div>
-                                    <div className="w-3 h-3 rounded-full bg-emerald-400/50"></div>
+                                    <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                                    <div className="w-3 h-3 rounded-full bg-amber-400"></div>
+                                    <div className="w-3 h-3 rounded-full bg-emerald-400"></div>
                                 </div>
-                                <div className="bg-white/20 backdrop-blur-xl px-4 py-1 rounded-md text-[10px] text-white/40 font-medium w-64 truncate text-center">
-                                    preview.jual.in/{data.product_name.toLowerCase().replace(/ /g, '-')}
+                                <div className="bg-white px-4 py-1 rounded-md text-[10px] text-slate-400 font-medium w-64 truncate text-center shadow-sm">
+                                    {data.product_name.toLowerCase().replace(/ /g, '-')}.html
                                 </div>
                                 <div className="w-10"></div>
                             </div>
-                            
-                            <div className="h-[700px] overflow-y-auto scrollbar-thin bg-white">
+
+                            <div 
+                                className="h-[700px] overflow-y-auto scrollbar-thin transition-colors duration-500"
+                                style={{ color: selectedTemplate?.text_color || '#1e293b' }}
+                            >
                                 {previewContent?.html_content ? (
                                     <div dangerouslySetInnerHTML={{ __html: previewContent.html_content }} />
                                 ) : (
-                                    <>
-                                        {/* Fallback Navigation Bar */}
-                                        <nav className="px-12 py-6 flex justify-between items-center" style={{ color: selectedTemplate?.text_color }}>
-                                            <span className="text-xl font-black tracking-tighter" style={{ fontFamily: selectedTemplate?.font_family }}>
-                                                {previewContent?.copy?.web_name || 'BRAND'}
-                                            </span>
-                                            <div className="flex gap-8 text-[10px] font-bold uppercase tracking-widest opacity-60">
-                                                <span>Home</span>
-                                                <span>Features</span>
-                                                <span>Contact</span>
-                                            </div>
-                                        </nav>
-
-                                        <div className="px-12 pt-12 pb-24 text-center" style={{ color: selectedTemplate?.text_color || '#1e293b' }}>
-                                            <div className="max-w-3xl mx-auto space-y-10">
-                                                <div className="space-y-6">
-                                                    <h1 className="text-5xl font-black leading-tight tracking-tight" style={{ fontFamily: selectedTemplate?.font_family }}>
-                                                        {previewContent?.copy?.headline}
-                                                    </h1>
-                                                    <p className="text-xl opacity-70 leading-relaxed max-w-2xl mx-auto">{previewContent?.copy?.subheadline}</p>
-                                                    <div className="pt-4">
-                                                        <button 
-                                                            className="font-bold py-5 px-12 rounded-2xl shadow-2xl transition-transform hover:scale-105"
-                                                            style={{ backgroundColor: data.brand_color || selectedTemplate?.accent_color, color: selectedTemplate?.bg_color }}
-                                                        >
-                                                            {previewContent?.copy?.cta}
-                                                        </button>
-                                                    </div>
-                                                </div>
-
-                                                {/* Hero Image Section */}
-                                                {previewContent?.copy?.hero_image && (
-                                                    <div className="mt-16 rounded-3xl overflow-hidden shadow-2xl border border-black/5 aspect-video bg-black/5 flex items-center justify-center">
-                                                        <img 
-                                                            src={previewContent.copy.hero_image} 
-                                                            alt="Hero" 
-                                                            className="w-full h-full object-cover"
-                                                            onError={(e) => {
-                                                                e.target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1999&auto=format&fit=crop';
-                                                                e.target.onerror = null;
-                                                            }}
-                                                        />
-                                                    </div>
-                                                )}
-
-                                                <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8">
-                                                    {previewContent?.copy?.benefits?.map((b, i) => (
-                                                        <div key={i} className="p-8 rounded-3xl bg-white/5 border border-white/10 text-left backdrop-blur-sm">
-                                                            <div className="w-12 h-12 rounded-2xl mb-6 flex items-center justify-center" style={{ backgroundColor: (data.brand_color || selectedTemplate?.accent_color) + '20' }}>
-                                                                <CheckCircle2 className="w-6 h-6" style={{ color: data.brand_color || selectedTemplate?.accent_color }} />
-                                                            </div>
-                                                            <h4 className="font-bold text-lg mb-3">{b}</h4>
-                                                            <p className="text-sm opacity-60 leading-relaxed">Keunggulan ini dirancang untuk meningkatkan konversi penjualan Anda.</p>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </>
+                                    <div className="flex items-center justify-center h-full text-slate-400">
+                                        Gagal merender preview. Silakan coba generate ulang.
+                                    </div>
                                 )}
                             </div>
                         </div>

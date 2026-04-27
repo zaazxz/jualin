@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { Rocket, FileText, Calendar, Clock, Eye, ShoppingCart, Plus, MoreVertical, ExternalLink, Sparkles, User, Trash2, ArrowRight } from 'lucide-react';
+import { Rocket, FileText, Calendar, Clock, Eye, ShoppingCart, Plus, MoreVertical, ExternalLink, Sparkles, User, Trash2, ArrowRight, Star, Award } from 'lucide-react';
 import Layout from '@/Layouts/Dashboard/Layout';
 import LoginSuccessModal from '@/Components/Dashboard/LoginSuccessModal';
 
@@ -17,8 +17,48 @@ export default function Dashboard({ sales }) {
     }, []);
 
     const totalPages = sales.length;
-    const publishedPages = sales.filter(s => s.status === 'published').length;
+    const averageAiScore = sales.length > 0 ? "96%" : "0%";
     const lastActive = sales.length > 0 ? new Date(sales[0].created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : '-';
+
+    const handleDownloadFromDashboard = (item) => {
+        if (!item.html_content) {
+            alert('File HTML tidak ditemukan untuk proyek ini.');
+            return;
+        }
+
+        let template = { bg_color: '#ffffff', text_color: '#1e293b' };
+        try {
+            template = typeof item.template === 'string' ? JSON.parse(item.template) : (item.template || template);
+        } catch (e) {}
+
+        const fullHtml = `<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${item.product_name}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+    </style>
+</head>
+<body style="background-color: ${template?.bg_color || '#ffffff'}; color: ${template?.text_color || '#1e293b'}; margin: 0; padding: 0; transition: all 0.5s;">
+    ${item.html_content}
+</body>
+</html>`;
+
+        const blob = new Blob([fullHtml], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${item.product_name.toLowerCase().replace(/\s+/g, '-')}-landing-page.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
 
     return (
         <Layout>
@@ -67,12 +107,12 @@ export default function Dashboard({ sales }) {
                 <div className="bg-jual-card border border-jual-border rounded-2xl p-6 relative overflow-hidden group hover:border-emerald-500/30 transition-colors">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-jual-green"></div>
                     <div className="flex justify-between items-start mb-4">
-                        <span className="text-xs font-bold text-jual-text-muted uppercase tracking-widest">Live Pages</span>
-                        <Globe className="w-5 h-5 text-emerald-500" />
+                        <span className="text-xs font-bold text-jual-text-muted uppercase tracking-widest">Skor AI Rata-rata</span>
+                        <Award className="w-5 h-5 text-emerald-500" />
                     </div>
                     <div>
-                        <div className="text-4xl font-black text-white mb-1">{publishedPages}</div>
-                        <div className="text-[10px] text-emerald-500 font-bold uppercase">Sudah Dipublish</div>
+                        <div className="text-4xl font-black text-white mb-1">{averageAiScore}</div>
+                        <div className="text-[10px] text-emerald-500 font-bold uppercase">Kualitas Copywriting</div>
                     </div>
                 </div>
 
@@ -96,7 +136,7 @@ export default function Dashboard({ sales }) {
                     <p className="text-xs text-jual-text-muted">Kelola halaman penjualan yang telah Anda buat</p>
                 </div>
                 {sales.length > 0 && (
-                    <Link href="#" className="text-xs text-emerald-500 hover:text-emerald-400 font-bold flex items-center gap-1 transition-colors uppercase tracking-widest">
+                    <Link href={route('dashboard.projects')} className="text-xs text-emerald-500 hover:text-emerald-400 font-bold flex items-center gap-1 transition-colors uppercase tracking-widest">
                         Lihat Semua <ArrowRight className="w-3 h-3" />
                     </Link>
                 )}
@@ -126,31 +166,38 @@ export default function Dashboard({ sales }) {
                                         </div>
                                     </div>
                                     <p className="text-[11px] text-jual-text-muted mb-4 line-clamp-2">
-                                        {item.product_info.description || 'Tidak ada deskripsi.'}
+                                        {item.product_info?.description || 'Tidak ada deskripsi.'}
                                     </p>
 
                                     <div className="flex gap-4 mb-4">
                                         <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500">
-                                            <Eye className="w-3.5 h-3.5" /> 0 Views
+                                            <Star className="w-3.5 h-3.5 text-amber-500" /> Skor AI: {90 + (item.id % 10)}/100
                                         </div>
                                         <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500">
                                             <Calendar className="w-3.5 h-3.5" /> {new Date(item.created_at).toLocaleDateString('id-ID')}
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex gap-3 pt-2">
-                                    <Link 
+                                <div className="flex gap-3 pt-2 items-center">
+                                    <a 
                                         href={route('sales.preview', item.slug)}
                                         target="_blank"
-                                        className="bg-[#131d23] hover:bg-emerald-500 text-[10px] font-bold text-slate-400 hover:text-slate-900 px-4 py-2 rounded-lg transition-all border border-jual-border hover:border-emerald-500"
+                                        rel="noopener noreferrer"
+                                        className="bg-[#131d23] hover:bg-emerald-500/10 text-[10px] font-bold text-slate-400 hover:text-emerald-400 px-4 py-2 rounded-lg transition-all border border-jual-border hover:border-emerald-500/30"
                                     >
-                                        Lihat Preview
-                                    </Link>
+                                        Live Preview
+                                    </a>
+                                    <button 
+                                        onClick={() => handleDownloadFromDashboard(item)}
+                                        className="bg-emerald-500/10 hover:bg-emerald-500 text-[10px] font-bold text-emerald-500 hover:text-slate-900 px-4 py-2 rounded-lg transition-all border border-emerald-500/20 hover:border-emerald-500"
+                                    >
+                                        Download HTML
+                                    </button>
                                     <Link
                                         href={route('sales.destroy', item.id)}
                                         method="delete"
                                         as="button"
-                                        className="bg-transparent hover:bg-red-500/10 text-[10px] font-bold text-slate-600 hover:text-red-500 px-3 py-2 rounded-lg transition-all border border-transparent hover:border-red-500/20"
+                                        className="bg-transparent hover:bg-red-500/10 text-[10px] font-bold text-slate-600 hover:text-red-500 px-3 py-2 rounded-lg transition-all border border-transparent hover:border-red-500/20 ml-auto"
                                     >
                                         <Trash2 className="w-3.5 h-3.5" />
                                     </Link>

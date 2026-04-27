@@ -26,6 +26,20 @@ class SalesController extends Controller
     }
 
     /**
+     * Display all projects.
+     */
+    public function projects()
+    {
+        $sales = Sales::where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return Inertia::render('Dashboard/Projects', [
+            'sales' => $sales
+        ]);
+    }
+
+    /**
      * Generate AI content and templates.
      */
     public function generate(Request $request, GeminiService $gemini)
@@ -39,6 +53,8 @@ class SalesController extends Controller
             'tone' => 'nullable|string',
             'web_name' => 'nullable|string',
             'brand_color' => 'nullable|string',
+            'features' => 'nullable|string',
+            'price' => 'nullable|string',
         ]);
 
         $result = $gemini->generateSalesContent(
@@ -47,14 +63,16 @@ class SalesController extends Controller
             $validated['audience'] ?? 'Umum',
             $validated['tone'] ?? 'Profesional',
             $validated['web_name'] ?? null,
-            $validated['brand_color'] ?? null
+            $validated['brand_color'] ?? null,
+            $validated['features'] ?? null,
+            $validated['price'] ?? null
         );
 
-        if (!$result) {
-            return response()->json(['error' => 'Gagal menghasilkan konten AI'], 500);
+        if (!$result['success']) {
+            return response()->json(['error' => $result['error']], 500);
         }
 
-        return response()->json($result);
+        return response()->json($result['data']);
     }
 
     /**

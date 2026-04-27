@@ -14,6 +14,7 @@ class Sales extends Model
         'product_name',
         'product_info',
         'generated_content',
+        'html_content',
         'template',
         'status',
         'slug'

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutDashboard, Sparkles, LayoutTemplate, BarChart3, Settings, HelpCircle, LogOut, Moon, Bell, User, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Sparkles, BarChart3, Settings, HelpCircle, LogOut, Moon, Bell, User, Menu, X, FolderOpen } from 'lucide-react';
 import Sidebar from '@/Components/Dashboard/Sidebar';
 import Topbar from '@/Components/Dashboard/Topbar';
 
@@ -11,9 +11,9 @@ export default function Layout({ children }) {
     const navItems = [
         { name: 'Dashboard', href: route('dashboard'), icon: LayoutDashboard },
         { name: 'AI Generator', href: route('dashboard.ai-generator'), icon: Sparkles },
-        { name: 'Templates', href: route('dashboard.templates'), icon: LayoutTemplate },
-        { name: 'Analytics', href: route('dashboard.analytics'), icon: BarChart3 },
-        { name: 'Settings', href: route('dashboard.settings'), icon: Settings },
+        { name: 'Proyek Saya', href: route('dashboard.projects'), icon: FolderOpen },
+        { name: 'Analytics', href: '#', icon: BarChart3, isModal: true },
+        { name: 'Settings', href: route('profile.edit'), icon: Settings },
     ];
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
