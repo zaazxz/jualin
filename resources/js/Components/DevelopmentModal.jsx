@@ -43,14 +43,14 @@ export default function DevelopmentModal({ isOpen, onClose }) {
                         <div className="absolute inset-0 bg-emerald-500/20 blur-2xl rounded-full -z-10 animate-pulse"></div>
                     </div>
 
-                    <h3 className="text-xl font-bold text-white mb-3">Mohon Maaf!</h3>
+                    <h3 className="text-xl font-bold text-white mb-3">Fitur Sedang Disiapkan!</h3>
                     <div className="inline-flex items-center space-x-2 bg-jual-card border border-jual-border rounded-full px-3 py-1 mb-4">
-                        <Sparkles className="w-3 h-3 text-[#FDE047]" />
-                        <span className="text-[10px] font-bold tracking-wider text-[#FDE047] uppercase">Dalam Pengembangan</span>
+                        <Sparkles className="w-3 h-3 text-emerald-500" />
+                        <span className="text-[10px] font-bold tracking-wider text-emerald-500 uppercase">Coming Soon</span>
                     </div>
                     
                     <p className="text-slate-400 text-sm leading-relaxed mb-8">
-                        Fitur <span className="text-emerald-400 font-medium italic">Masuk dengan Google</span> saat ini sedang dalam tahap pengembangan intensif untuk memastikan keamanan dan kenyamanan Anda.
+                        Fitur yang Anda pilih saat ini sedang dalam tahap <span className="text-emerald-400 font-medium italic">pengembangan intensif</span> oleh tim kami untuk memastikan kualitas dan kenyamanan terbaik bagi Anda.
                     </p>
 
                     <button 
