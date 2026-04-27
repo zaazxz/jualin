@@ -24,6 +24,14 @@ Route::get('/register', function () {
     return Inertia::render('Auth/Register');
 })->name('register');
 
+Route::get('/terms', function () {
+    return Inertia::render('Legal/Terms');
+})->name('terms');
+
+Route::get('/privacy', function () {
+    return Inertia::render('Legal/Privacy');
+})->name('privacy');
+
 // Authenticated only
 Route::middleware(['auth'])->group(function () {
     
