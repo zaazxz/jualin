@@ -1,146 +1,234 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { Check, ArrowRight, Zap, ShoppingCart, ShieldCheck, Star } from 'lucide-react';
+import { Check, ArrowRight, Zap, Mail, Globe, MessageSquare, Star, Award, TrendingUp, Sparkles } from 'lucide-react';
 
 export default function Preview({ sales }) {
     const { product_name, generated_content, product_info } = sales;
-    const content = generated_content || {
-        headline: product_name,
-        subheadline: "Solusi terbaik untuk bisnis Anda.",
-        description: "Konten sedang dihasilkan...",
-        benefits: [],
-        cta: "Beli Sekarang"
+    
+    const content = generated_content || {};
+    const template = sales.template ? (typeof sales.template === 'string' ? JSON.parse(sales.template) : sales.template) : {
+        id: 't1',
+        bg_color: '#ffffff',
+        text_color: '#1e293b',
+        accent_color: product_info.brand_color || '#10b981',
+        font_family: 'Sans'
     };
 
-    return (
-        <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-emerald-500 selection:text-white">
-            <Head title={product_name} />
+    const webName = product_info.web_name || content.web_name || product_name.toUpperCase();
+    const brandColor = product_info.brand_color || template.accent_color;
+    const isDark = template.bg_color === '#1a1a2e' || template.bg_color.includes('1e') || template.bg_color.includes('111');
 
-            {/* Navigation (Simple) */}
-            <nav className="fixed top-0 left-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-slate-100">
-                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-                    <span className="text-xl font-black text-emerald-600 tracking-tighter">Jual<span className="text-slate-900">.in</span></span>
-                    <button className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-full transition-all text-sm">
+    // Jika ada HTML dinamis dari AI, gunakan itu sebagai layout utama
+    if (sales.html_content) {
+        return (
+            <div className="min-h-screen bg-white">
+                <Head title={content.headline || product_name} />
+                <div dangerouslySetInnerHTML={{ __html: sales.html_content }} />
+            </div>
+        );
+    }
+
+    // Custom CSS for Fonts
+    const fontStyles = template.font_family === 'Serif' 
+        ? { fontFamily: "'Playfair Display', serif" } 
+        : { fontFamily: "'Inter', sans-serif" };
+
+    // Common Components
+    const Button = ({ children, className = "" }) => (
+        <button 
+            className={`font-black py-4 px-10 rounded-2xl transition-all shadow-xl hover:-translate-y-1 active:translate-y-0 ${className}`}
+            style={{ backgroundColor: brandColor, color: template.bg_color }}
+        >
+            {children}
+        </button>
+    );
+
+    // LAYOUT 1: MODERN EXECUTIVE (Split Layout)
+    const LayoutModern = () => (
+        <div className="min-h-screen">
+            <section className="pt-40 pb-24 px-6 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
+                <div className="flex-1 space-y-8 animate-in fade-in slide-in-from-left-8 duration-1000">
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest" style={{ backgroundColor: brandColor + '20', color: brandColor }}>
+                        <Zap className="w-3.5 h-3.5 fill-current" /> Premium Quality
+                    </div>
+                    <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.95]" style={fontStyles}>
+                        {content.headline}
+                    </h1>
+                    <p className="text-xl opacity-70 leading-relaxed max-w-xl">
+                        {content.subheadline}
+                    </p>
+                    <div className="flex flex-col sm:flex-row items-center gap-6 pt-4">
+                        <Button>{content.cta}</Button>
+                        <div className="flex items-center gap-3 opacity-60">
+                            <TrendingUp className="w-5 h-5" />
+                            <span className="text-sm font-bold">1.2k+ Terjual Bulan Ini</span>
+                        </div>
+                    </div>
+                </div>
+                <div className="flex-1 w-full relative animate-in fade-in zoom-in duration-1000">
+                    <div className="aspect-square rounded-[3rem] overflow-hidden shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-700 bg-slate-200">
+                        <img src={content.hero_image} className="w-full h-full object-cover" alt="hero" />
+                    </div>
+                </div>
+            </section>
+
+            <section className="py-32 px-6 bg-black/5">
+                <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
+                    {content.benefits?.map((b, i) => (
+                        <div key={i} className="space-y-6">
+                            <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: brandColor }}>
+                                <Check className="w-6 h-6" style={{ color: template.bg_color }} />
+                            </div>
+                            <h3 className="text-2xl font-bold">{b}</h3>
+                            <p className="opacity-60 text-sm leading-relaxed">Analisis cerdas kami membuktikan keunggulan ini sangat krusial bagi kesuksesan Anda.</p>
+                        </div>
+                    ))}
+                </div>
+            </section>
+        </div>
+    );
+
+    // LAYOUT 2: MINIMALIST (Centered Layout)
+    const LayoutMinimalist = () => (
+        <div className="min-h-screen">
+            <section className="pt-48 pb-32 px-6 text-center max-w-4xl mx-auto space-y-10">
+                <div className="mx-auto w-20 h-1 rounded-full" style={{ backgroundColor: brandColor }}></div>
+                <h1 className="text-5xl md:text-7xl font-light tracking-tight" style={fontStyles}>
+                    {content.headline}
+                </h1>
+                <p className="text-xl opacity-60 leading-relaxed max-w-2xl mx-auto font-light italic">
+                    {content.subheadline}
+                </p>
+                <div className="pt-6">
+                    <Button className="rounded-full px-16">{content.cta}</Button>
+                </div>
+                <div className="pt-20 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+                    <img src={content.hero_image} className="w-full rounded-3xl shadow-lg border border-black/5" alt="hero" />
+                </div>
+            </section>
+
+            <section className="py-32 px-6">
+                <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
+                    <div className="space-y-12">
+                        <h2 className="text-4xl font-bold tracking-tight">Kelebihan yang Nyata.</h2>
+                        <div className="space-y-8">
+                            {content.benefits?.map((b, i) => (
+                                <div key={i} className="flex gap-6 items-start">
+                                    <div className="mt-1 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ border: `2px solid ${brandColor}` }}>
+                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: brandColor }}></div>
+                                    </div>
+                                    <p className="text-lg opacity-80">{b}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="bg-black/5 aspect-video rounded-3xl flex items-center justify-center p-12">
+                         <blockquote className="text-2xl font-light italic opacity-60 text-center">
+                            "Kualitas adalah satu-satunya standar yang tidak pernah kami tinggalkan."
+                         </blockquote>
+                    </div>
+                </div>
+            </section>
+        </div>
+    );
+
+    // LAYOUT 3: CLASSIC PREMIUM (Elegant Serif)
+    const LayoutClassic = () => (
+        <div className="min-h-screen overflow-x-hidden">
+            <section className="relative pt-40 pb-40 px-6">
+                <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+                    <div className="lg:col-span-7 space-y-10 relative z-10">
+                        <span className="text-sm font-bold uppercase tracking-[0.3em] opacity-40">ESTABLISHED 2026</span>
+                        <h1 className="text-6xl md:text-[5.5rem] font-medium leading-[1.05]" style={fontStyles}>
+                            {content.headline}
+                        </h1>
+                        <div className="w-32 h-px opacity-30 bg-current"></div>
+                        <p className="text-2xl opacity-60 font-light leading-relaxed max-w-xl">
+                            {content.subheadline}
+                        </p>
+                        <div className="pt-4">
+                            <button className="border-b-2 border-current pb-2 font-bold hover:opacity-50 transition-opacity">
+                                {content.cta} <ArrowRight className="inline ml-2 w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                    <div className="lg:col-span-5 relative">
+                        <div className="absolute -inset-10 bg-black/5 rounded-full blur-3xl opacity-50"></div>
+                        <div className="relative aspect-[3/4] rounded-t-full overflow-hidden shadow-2xl border-8 border-white/10">
+                            <img src={content.hero_image} className="w-full h-full object-cover" alt="hero" />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section className="py-40 bg-white/5 backdrop-blur-md border-y border-black/5">
+                <div className="max-w-5xl mx-auto text-center space-y-20">
+                    <h2 className="text-4xl font-light italic" style={fontStyles}>The {webName} Standard</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
+                        {content.benefits?.map((b, i) => (
+                            <div key={i} className="space-y-6">
+                                <Award className="w-10 h-10 mx-auto opacity-30" />
+                                <h3 className="text-xl font-bold tracking-tight uppercase">{b}</h3>
+                                <p className="text-xs opacity-50 leading-loose px-4">Diciptakan dengan presisi tinggi menggunakan standar industri internasional terbaru.</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+        </div>
+    );
+
+    return (
+        <div 
+            className="min-h-screen selection:bg-opacity-30 transition-colors duration-1000" 
+            style={{ 
+                backgroundColor: template.bg_color, 
+                color: template.text_color,
+                '--brand-color': brandColor
+            }}
+        >
+            <Head title={content.headline || product_name} />
+            <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet" />
+
+            {/* Global Navigation */}
+            <nav className="fixed top-0 left-0 w-full z-50 border-b border-black/5 backdrop-blur-md">
+                <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
+                    <span className="text-2xl font-black tracking-tighter" style={{ color: brandColor, ...fontStyles }}>
+                        {webName}
+                    </span>
+                    <div className="hidden md:flex gap-10 text-[10px] font-black uppercase tracking-[0.2em] opacity-50">
+                        <a href="#" className="hover:opacity-100 transition-opacity">Collection</a>
+                        <a href="#" className="hover:opacity-100 transition-opacity">Concept</a>
+                        <a href="#" className="hover:opacity-100 transition-opacity">Contact</a>
+                    </div>
+                    <button 
+                        className="font-black py-2.5 px-8 rounded-full transition-all text-xs tracking-widest uppercase shadow-lg border-2"
+                        style={{ borderColor: brandColor, color: isDark ? '#fff' : brandColor }}
+                    >
                         {content.cta}
                     </button>
                 </div>
             </nav>
 
-            {/* Hero Section */}
-            <section className="pt-40 pb-20 px-6">
-                <div className="max-w-4xl mx-auto text-center">
-                    <div className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-8 animate-in fade-in slide-in-from-bottom-2 duration-700">
-                        <Zap className="w-3.5 h-3.5 fill-emerald-700" /> Penawaran Eksklusif
+            {/* Render Layout based on ID */}
+            {template.id === 't1' && <LayoutModern />}
+            {template.id === 't2' && <LayoutMinimalist />}
+            {template.id === 't3' && <LayoutClassic />}
+            {!['t1','t2','t3'].includes(template.id) && <LayoutModern />}
+
+            {/* Footer */}
+            <footer className="py-32 px-6 border-t border-black/5 opacity-80 text-center">
+                <div className="max-w-7xl mx-auto space-y-12">
+                    <div className="flex justify-center gap-10">
+                        <Globe className="w-5 h-5 hover:scale-110 cursor-pointer transition-all" />
+                        <MessageSquare className="w-5 h-5 hover:scale-110 cursor-pointer transition-all" />
+                        <Mail className="w-5 h-5 hover:scale-110 cursor-pointer transition-all" />
                     </div>
-                    <h1 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tight leading-[1.1] mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
-                        {content.headline}
-                    </h1>
-                    <p className="text-xl text-slate-600 leading-relaxed max-w-2xl mx-auto mb-12 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-200">
-                        {content.subheadline}
-                    </p>
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
-                        <button className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 px-10 rounded-2xl text-lg transition-all shadow-[0_10px_30px_rgba(5,150,105,0.2)] hover:-translate-y-1">
-                            {content.cta}
-                        </button>
-                        <button className="w-full sm:w-auto bg-slate-50 hover:bg-slate-100 text-slate-900 font-bold py-4 px-10 rounded-2xl text-lg transition-all border border-slate-200">
-                            Pelajari Selengkapnya
-                        </button>
+                    <div className="space-y-4">
+                        <span className="text-xl font-black tracking-tighter" style={{ color: brandColor, ...fontStyles }}>{webName}</span>
+                        <p className="text-[10px] opacity-40 uppercase tracking-[0.4em]">Handcrafted with precision • 2026</p>
                     </div>
                 </div>
-            </section>
-
-            {/* Benefits / Features Section */}
-            <section className="py-24 bg-slate-50 px-6">
-                <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-20">
-                        <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">Kenapa Memilih {product_name}?</h2>
-                        <div className="w-20 h-1.5 bg-emerald-600 mx-auto rounded-full"></div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                        {content.benefits && content.benefits.length > 0 ? (
-                            content.benefits.map((benefit, i) => (
-                                <div key={i} className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-emerald-500/5 transition-all group">
-                                    <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-emerald-600 group-hover:rotate-6 transition-all">
-                                        <Check className="w-6 h-6 text-emerald-600 group-hover:text-white" />
-                                    </div>
-                                    <h3 className="text-xl font-bold text-slate-900 mb-3">{benefit}</h3>
-                                    <p className="text-slate-500 text-sm leading-relaxed">
-                                        Didesain khusus untuk memberikan hasil maksimal dengan upaya minimal bagi bisnis Anda.
-                                    </p>
-                                </div>
-                            ))
-                        ) : (
-                            // Fallback benefits
-                            [1, 2, 3].map((i) => (
-                                <div key={i} className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-                                    <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center mb-6">
-                                        <Check className="w-6 h-6 text-emerald-600" />
-                                    </div>
-                                    <h3 className="text-xl font-bold text-slate-900 mb-3">Keuntungan Unggulan {i}</h3>
-                                    <p className="text-slate-500 text-sm leading-relaxed">
-                                        Detail manfaat produk Anda akan muncul di sini setelah AI menyelesaikan analisisnya.
-                                    </p>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </div>
-            </section>
-
-            {/* Description Section */}
-            <section className="py-24 px-6 overflow-hidden">
-                <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
-                    <div className="flex-1 space-y-8">
-                        <h2 className="text-4xl font-black text-slate-900 leading-tight">Solusi yang Mengubah Cara Anda Berbisnis.</h2>
-                        <p className="text-lg text-slate-600 leading-relaxed">
-                            {content.description}
-                        </p>
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-3">
-                                <ShieldCheck className="w-6 h-6 text-emerald-600" />
-                                <span className="font-bold text-slate-700 text-lg">Terjamin & Terpercaya</span>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <Star className="w-6 h-6 text-emerald-600" />
-                                <span className="font-bold text-slate-700 text-lg">Kualitas Premium</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="flex-1 w-full">
-                        <div className="aspect-square bg-slate-100 rounded-[3rem] relative overflow-hidden group">
-                            <div className="absolute inset-0 bg-gradient-to-br from-emerald-600/20 to-transparent"></div>
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <ShoppingCart className="w-40 h-40 text-emerald-600/10 group-hover:scale-110 transition-transform duration-700" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Footer CTA */}
-            <section className="py-24 px-6 bg-slate-900 text-white">
-                <div className="max-w-4xl mx-auto text-center space-y-10">
-                    <h2 className="text-4xl md:text-5xl font-black tracking-tight leading-tight">
-                        Siap untuk Melejitkan Penjualan Anda Bersama {product_name}?
-                    </h2>
-                    <p className="text-slate-400 text-lg">
-                        Bergabunglah dengan ribuan pengusaha sukses lainnya yang telah membuktikan kualitas kami.
-                    </p>
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <button className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 px-12 rounded-2xl text-xl transition-all shadow-[0_10px_40px_rgba(16,185,129,0.3)]">
-                            {content.cta}
-                        </button>
-                    </div>
-                    <p className="text-slate-500 text-sm">
-                        Garansi uang kembali 30 hari tanpa syarat.
-                    </p>
-                </div>
-            </section>
-
-            {/* Bottom Footer */}
-            <footer className="py-10 border-t border-slate-100 px-6 text-center text-slate-400 text-sm font-medium">
-                © 2026 {product_name}. Powered by <Link href="/" className="text-emerald-600 font-bold">Jual.in</Link>
             </footer>
         </div>
     );

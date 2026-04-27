@@ -30,18 +30,24 @@ class SalesController extends Controller
      */
     public function generate(Request $request, GeminiService $gemini)
     {
+        set_time_limit(180); // Berikan waktu lebih untuk AI berkreasi
+
         $validated = $request->validate([
             'product_name' => 'required|string',
             'description' => 'required|string',
             'audience' => 'nullable|string',
             'tone' => 'nullable|string',
+            'web_name' => 'nullable|string',
+            'brand_color' => 'nullable|string',
         ]);
 
         $result = $gemini->generateSalesContent(
             $validated['product_name'],
             $validated['description'],
             $validated['audience'] ?? 'Umum',
-            $validated['tone'] ?? 'Profesional'
+            $validated['tone'] ?? 'Profesional',
+            $validated['web_name'] ?? null,
+            $validated['brand_color'] ?? null
         );
 
         if (!$result) {
@@ -69,6 +75,7 @@ class SalesController extends Controller
             'product_info' => $validated['product_info'],
             'generated_content' => $validated['generated_content'] ?? null,
             'template' => $validated['template'] ?? 'modern',
+            'html_content' => $request->input('html_content'), // Simpan HTML dinamis
             'status' => 'draft',
             'slug' => Str::slug($validated['product_name']) . '-' . Str::random(6),
         ]);

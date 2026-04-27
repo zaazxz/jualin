@@ -17,57 +17,64 @@ class GeminiService
         $this->model  = config('services.gemini.model', 'gemini-flash-latest');
     }
 
-    public function generateSalesContent($productName, $description, $audience, $tone)
+    public function generateSalesContent($productName, $description, $audience, $tone, $webName = null, $brandColor = null)
     {
-        $prompt = "Buat landing page copywriting + 3 variasi desain untuk produk berikut:\n"
-            . "Produk: {$productName}\n"
+        $brandColor = $brandColor ?: '#10b981';
+        $webName = $webName ?: $productName;
+
+        $prompt = "Buat landing page premium untuk produk: {$productName}.\n"
             . "Deskripsi: {$description}\n"
             . "Target: {$audience}\n"
-            . "Tone: {$tone}\n\n"
-            . "Balas HANYA dengan JSON valid (tanpa markdown, tanpa ```json, langsung JSON saja):\n"
-            . '{"copy":{"headline":"...","subheadline":"...","description":"...","benefits":["...","...","..."],"cta":"..."},'
-            . '"templates":[{"id":"t1","name":"...","desc":"...","bg_color":"#1a1a2e","text_color":"#eee","accent_color":"#e94560","font_family":"Sans"},'
-            . '{"id":"t2","name":"...","desc":"...","bg_color":"#f0fdf4","text_color":"#14532d","accent_color":"#16a34a","font_family":"Sans"},'
-            . '{"id":"t3","name":"...","desc":"...","bg_color":"#fff7ed","text_color":"#7c2d12","accent_color":"#ea580c","font_family":"Serif"}]}';
+            . "Tone: {$tone}\n"
+            . "Nama Website: {$webName}\n"
+            . "Warna Brand Utama: {$brandColor}\n\n"
+            . "Tugas Anda adalah menghasilkan JSON yang berisi:\n"
+            . "1. 'copy': Objek berisi headline, subheadline, cta, dan hero_image (Unsplash URL).\n"
+            . "2. 'html_content': STRING HTML UTUH untuk bagian utama landing page (tanpa <html>/<body>, langsung <div> utama saja).\n"
+            . "   - Gunakan Tailwind CSS CLASSES untuk semua styling.\n"
+            . "   - Buat layout yang UNIK dan DINAMIS (jangan hanya template standar).\n"
+            . "   - Sertakan animasi Tailwind (seperti animate-bounce, hover:scale-105, dsb).\n"
+            . "   - Gunakan warna {$brandColor} sebagai aksen utama pada tombol, border, atau icon.\n"
+            . "   - Pastikan responsive (mobile friendly).\n\n"
+            . "Balas HANYA dengan JSON valid:\n"
+            . '{
+                "copy": {"headline": "...", "subheadline": "...", "cta": "...", "hero_image": "...", "web_name": "..."},
+                "html_content": "...",
+                "templates": [
+                    {"id": "t1", "name": "Modern AI Custom", "bg_color": "#ffffff", "text_color": "#1e293b", "accent_color": "' . $brandColor . '", "font_family": "Sans"}
+                ]
+            }';
 
         try {
-        $response = Http::withoutVerifying()
-            ->timeout(90)
-            ->post($this->baseUrl . $this->model . ':generateContent?key=' . $this->apiKey, [
-                'contents' => [
-                    [
-                        'role' => 'user', // Tambahkan role untuk best practice
-                        'parts' => [['text' => $prompt]]
-                    ]
-                ],
-                'generationConfig' => [
-                    'temperature' => 0.7,
-                    'maxOutputTokens' => 8192,
-                    'responseMimeType' => 'application/json', 
-                ],
-            ]);
+            $response = Http::withoutVerifying()
+                ->timeout(90)
+                ->post($this->baseUrl . $this->model . ':generateContent?key=' . $this->apiKey, [
+                    'contents' => [['role' => 'user', 'parts' => [['text' => $prompt]]]],
+                    'generationConfig' => [
+                        'temperature' => 0.9, // Sedikit lebih tinggi agar lebih kreatif
+                        'maxOutputTokens' => 8192,
+                        'responseMimeType' => 'application/json', 
+                    ],
+                ]);
 
-        if ($response->successful()) {
-            $data = $response->json();
-            
-            // Cara yang lebih aman mengambil teks pada mode JSON
-            $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
+            if ($response->successful()) {
+                $data = $response->json();
+                $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
 
-            if ($text) {
-                $decoded = json_decode($text, true);
-                if (json_last_error() === JSON_ERROR_NONE) {
-                    return $decoded;
+                if ($text) {
+                    $decoded = json_decode($text, true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        return $decoded;
+                    }
                 }
-                Log::error('Gemini JSON Decode Error: ' . json_last_error_msg());
             }
+
+            Log::error('Gemini API Error: ' . $response->status() . ' - ' . $response->body());
+            return null;
+
+        } catch (\Exception $e) {
+            Log::error('Gemini Service Exception: ' . $e->getMessage());
+            return null;
         }
-
-        Log::error('Gemini API Error: ' . $response->status() . ' - ' . $response->body());
-        return null;
-
-    } catch (\Exception $e) {
-        Log::error('Gemini Service Exception: ' . $e->getMessage());
-        return null;
-    }
     }
 }
