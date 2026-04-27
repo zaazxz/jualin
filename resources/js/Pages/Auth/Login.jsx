@@ -1,9 +1,22 @@
 import React, { useState } from 'react';
-import { Head, Link } from '@inertiajs/react';
-import { Eye, EyeOff, Mail, Lock, LogIn, Sparkles } from 'lucide-react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { Eye, EyeOff, Mail, Lock, LogIn, Sparkles, AlertCircle, CheckCircle2 } from 'lucide-react';
 
-export default function Login() {
+export default function Login({ status, canResetPassword }) {
     const [showPassword, setShowPassword] = useState(false);
+
+    const { data, setData, post, processing, errors, reset } = useForm({
+        email: '',
+        password: '',
+        remember: false,
+    });
+
+    const submit = (e) => {
+        e.preventDefault();
+        post(route('login'), {
+            onFinish: () => reset('password'),
+        });
+    };
 
     return (
         <div className="min-h-screen bg-jual-bg text-jual-text-main font-sans selection:bg-jual-green selection:text-white bg-grid-pattern relative flex justify-center items-center p-4 sm:p-6 lg:p-8">
@@ -34,41 +47,70 @@ export default function Login() {
                     {/* Subtle top glow */}
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"></div>
 
-                    <div className="mb-3">
+                    <div className="mb-6">
                         <h2 className="text-xl font-semibold text-slate-100 tracking-tight">Selamat Datang</h2>
                         <p className="text-sm text-slate-400 mt-1.5 leading-relaxed">Silakan masuk ke akun Anda untuk melanjutkan.</p>
                     </div>
 
-                    <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                    {/* Flash Status Message */}
+                    {status && (
+                        <div className="mb-6 flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/20 p-3.5 rounded-xl animate-in slide-in-from-top-2 duration-300">
+                            <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                            <p className="text-sm font-medium text-emerald-200 leading-tight">{status}</p>
+                        </div>
+                    )}
+
+                    {/* General Error Message (Optional Debug) */}
+                    {errors.message && (
+                        <div className="mb-6 flex items-center gap-3 bg-red-500/10 border border-red-500/20 p-3.5 rounded-xl animate-in slide-in-from-top-2 duration-300">
+                            <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
+                            <p className="text-sm font-medium text-red-200 leading-tight">{errors.message}</p>
+                        </div>
+                    )}
+
+                    <form className="space-y-6" onSubmit={submit}>
+
                         {/* Email Input */}
                         <div className="space-y-2">
                             <label className="text-[10px] font-bold text-emerald-500/90 uppercase tracking-widest ml-1">Alamat Email</label>
                             <div className="relative group/input">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <Mail className="w-4 h-4 text-slate-500 group-focus-within/input:text-emerald-500 transition-colors" />
+                                    <Mail className={`w-4 h-4 ${errors.email ? 'text-red-400' : 'text-slate-500 group-focus-within/input:text-emerald-500'} transition-colors`} />
                                 </div>
                                 <input
                                     type="email"
+                                    name="email"
+                                    value={data.email}
+                                    autoComplete="username"
+                                    onChange={(e) => setData('email', e.target.value)}
                                     placeholder="nama@email.com"
-                                    className="w-full bg-[#131d23] border border-[#1f2e36] rounded-xl pl-11 pr-4 py-3 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300"
+                                    className={`w-full bg-[#131d23] border ${errors.email ? 'border-red-500/50 focus:border-red-500' : 'border-[#1f2e36] focus:border-emerald-500/50'} rounded-xl pl-11 pr-4 py-3 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-4 ${errors.email ? 'focus:ring-red-500/10' : 'focus:ring-emerald-500/10'} transition-all duration-300`}
                                 />
                             </div>
+                            {errors.email && (
+                                <p className="text-[11px] font-medium text-red-400 ml-1 mt-1 animate-in fade-in duration-200">{errors.email}</p>
+                            )}
                         </div>
 
                         {/* Password Input */}
                         <div className="space-y-2">
                             <div className="flex justify-between items-center ml-1">
                                 <label className="text-[10px] font-bold text-emerald-500/90 uppercase tracking-widest">Kata Sandi</label>
-                                <Link href="#" className="text-[10px] font-bold text-yellow-600/90 hover:text-yellow-500 uppercase tracking-wider transition-colors">Lupa Password?</Link>
+                                <Link href="#" className=" text-[10px] font-bold text-yellow-600/90 hover:text-yellow-500 uppercase tracking-wider transition-colors">Lupa Password?</Link>
+                                {/* <Link href={route('password.request')} className="text-[10px] font-bold text-yellow-600/90 hover:text-yellow-500 uppercase tracking-wider transition-colors">Lupa Password?</Link> */}
                             </div>
                             <div className="relative group/input">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <Lock className="w-4 h-4 text-slate-500 group-focus-within/input:text-emerald-500 transition-colors" />
+                                    <Lock className={`w-4 h-4 ${errors.password ? 'text-red-400' : 'text-slate-500 group-focus-within/input:text-emerald-500'} transition-colors`} />
                                 </div>
                                 <input
                                     type={showPassword ? "text" : "password"}
+                                    name="password"
+                                    value={data.password}
+                                    autoComplete="current-password"
+                                    onChange={(e) => setData('password', e.target.value)}
                                     placeholder="••••••••"
-                                    className="w-full bg-[#131d23] border border-[#1f2e36] rounded-xl pl-11 pr-12 py-3 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300"
+                                    className={`w-full bg-[#131d23] border ${errors.password ? 'border-red-500/50 focus:border-red-500' : 'border-[#1f2e36] focus:border-emerald-500/50'} rounded-xl pl-11 pr-12 py-3 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-4 ${errors.password ? 'focus:ring-red-500/10' : 'focus:ring-emerald-500/10'} transition-all duration-300`}
                                 />
                                 <button
                                     type="button"
@@ -78,6 +120,9 @@ export default function Login() {
                                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
                             </div>
+                            {errors.password && (
+                                <p className="text-[11px] font-medium text-red-400 ml-1 mt-1 animate-in fade-in duration-200">{errors.password}</p>
+                            )}
                         </div>
 
                         {/* Remember Me */}
@@ -86,6 +131,9 @@ export default function Login() {
                                 <input
                                     id="remember"
                                     type="checkbox"
+                                    name="remember"
+                                    checked={data.remember}
+                                    onChange={(e) => setData('remember', e.target.checked)}
                                     className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-[#1f2e36] bg-[#131d23] checked:border-emerald-500 checked:bg-emerald-500 transition-all duration-300"
                                 />
                                 <span className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-900 opacity-0 peer-checked:opacity-100 transition-opacity">
@@ -102,10 +150,11 @@ export default function Login() {
                         {/* Submit Button */}
                         <button
                             type="submit"
-                            className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-900 font-bold py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(16,185,129,0.2)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.3)] hover:-translate-y-0.5 active:translate-y-0"
+                            disabled={processing}
+                            className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-900 font-bold py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(16,185,129,0.2)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.3)] hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                         >
-                            <span>Masuk</span>
-                            <LogIn className="w-4 h-4" />
+                            <span>{processing ? 'Memproses...' : 'Masuk'}</span>
+                            {!processing && <LogIn className="w-4 h-4" />}
                         </button>
                     </form>
 
@@ -134,14 +183,14 @@ export default function Login() {
                     <div className="mt-10 text-center">
                         <p className="text-sm text-slate-400">
                             Belum punya akun?{' '}
-                            <Link href="/register" className="text-emerald-500 hover:text-emerald-400 font-bold transition-colors ml-1">
+                            <Link href={route('register')} className="text-emerald-500 hover:text-emerald-400 font-bold transition-colors ml-1">
                                 Daftar Gratis
                             </Link>
                         </p>
                     </div>
                 </div>
 
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

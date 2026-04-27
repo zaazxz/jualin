@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -19,22 +19,23 @@ use Inertia\Inertia;
 Route::get('/', function () {
     return Inertia::render('Welcome');
 });
-
-// Authentication (guest only)
-Route::get('/login', function () {
-    return Inertia::render('Auth/Login');
-})->name('login');
-
+    
 Route::get('/register', function () {
     return Inertia::render('Auth/Register');
 })->name('register');
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard/Index');
-})->name('dashboard');
+// Authenticated only
+Route::middleware(['auth'])->group(function () {
+    
+    // Dashboard 
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard/Index');
+    })->name('dashboard');
+
+});
 
 // Route::get('/dashboard', function () {
 //     return Inertia::render('Dashboard');
 // })->middleware(['auth', 'verified'])->name('dashboard');
 
-// require __DIR__.'/auth.php';
+require __DIR__.'/auth.php';

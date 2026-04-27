@@ -10,6 +10,7 @@ export default function Sidebar({ isSidebarOpen, toggleSidebar, navItems }) {
         <>
             <aside className={`w-64 bg-jual-bg border-r border-jual-border flex flex-col fixed h-full z-40 transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
                 }`}>
+
                 {/* Logo Area */}
                 <div className="h-16 lg:h-20 flex items-center justify-between px-6 border-b border-jual-border">
                     <Link href="/" className="flex items-center gap-2">
@@ -57,7 +58,12 @@ export default function Sidebar({ isSidebarOpen, toggleSidebar, navItems }) {
                         <HelpCircle className="w-5 h-5" />
                         Help Center
                     </a>
-                    <Link href="#" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-jual-text-muted hover:bg-red-500/10 hover:text-red-400 transition-colors">
+                    <Link
+                        href={route('logout')}
+                        method="post"
+                        as="button"
+                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-jual-text-muted hover:bg-red-500/10 hover:text-red-400 transition-colors cursor-pointer"
+                    >
                         <LogOut className="w-5 h-5" />
                         Logout
                     </Link>
