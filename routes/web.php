@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\SalesController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -32,13 +33,17 @@ Route::get('/privacy', function () {
     return Inertia::render('Legal/Privacy');
 })->name('privacy');
 
+Route::get('/p/{slug}', [SalesController::class, 'show'])->name('sales.preview');
+
+
 // Authenticated only
 Route::middleware(['auth', 'verified'])->group(function () {
     
-    // Dashboard 
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard/Index');
-    })->name('dashboard');
+    Route::get('/dashboard', [SalesController::class, 'index'])->name('dashboard');
+    Route::post('/sales/generate', [SalesController::class, 'generate'])->name('sales.generate');
+
+    Route::delete('/sales/{sales}', [SalesController::class, 'destroy'])->name('sales.destroy');
+    Route::post('/sales', [SalesController::class, 'store'])->name('sales.store');
 
     Route::get('/dashboard/ai-generator', function () {
         return Inertia::render('Dashboard/AiGenerator');
