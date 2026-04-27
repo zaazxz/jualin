@@ -106,8 +106,12 @@ export default function Dashboard({ sales }) {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {sales.map((item) => (
                         <div key={item.id} className="bg-jual-card border border-jual-border rounded-2xl p-5 flex flex-col sm:flex-row gap-5 border-l-4 border-l-emerald-500 hover:bg-[#0f171c] transition-all duration-300 group">
-                            <div className="w-full sm:w-32 aspect-square bg-[#131d23] rounded-xl flex items-center justify-center border border-jual-border group-hover:border-emerald-500/20 transition-colors">
-                                <FileText className="w-10 h-10 text-slate-700 group-hover:text-emerald-500/40 transition-colors" />
+                            <div className="w-full sm:w-32 aspect-square bg-[#131d23] rounded-xl flex items-center justify-center border border-jual-border group-hover:border-emerald-500/20 transition-colors overflow-hidden">
+                                {item.generated_content?.hero_image ? (
+                                    <img src={item.generated_content.hero_image} alt={item.product_name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                ) : (
+                                    <FileText className="w-10 h-10 text-slate-700 group-hover:text-emerald-500/40 transition-colors" />
+                                )}
                             </div>
                             <div className="flex-1 flex flex-col justify-between">
                                 <div>
