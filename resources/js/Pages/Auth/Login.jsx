@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Eye, EyeOff, Mail, Lock, LogIn, Sparkles, AlertCircle, CheckCircle2 } from 'lucide-react';
+import DevelopmentModal from '@/Components/DevelopmentModal';
 
 export default function Login({ status, canResetPassword }) {
     const [showPassword, setShowPassword] = useState(false);
+    const [showDevModal, setShowDevModal] = useState(false);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
@@ -96,8 +98,7 @@ export default function Login({ status, canResetPassword }) {
                         <div className="space-y-2">
                             <div className="flex justify-between items-center ml-1">
                                 <label className="text-[10px] font-bold text-emerald-500/90 uppercase tracking-widest">Kata Sandi</label>
-                                <Link href="#" className=" text-[10px] font-bold text-yellow-600/90 hover:text-yellow-500 uppercase tracking-wider transition-colors">Lupa Password?</Link>
-                                {/* <Link href={route('password.request')} className="text-[10px] font-bold text-yellow-600/90 hover:text-yellow-500 uppercase tracking-wider transition-colors">Lupa Password?</Link> */}
+                                <Link href={route('password.request')} className="text-[10px] font-bold text-yellow-600/90 hover:text-yellow-500 uppercase tracking-wider transition-colors">Lupa Password?</Link>
                             </div>
                             <div className="relative group/input">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -169,7 +170,11 @@ export default function Login({ status, canResetPassword }) {
                     </div>
 
                     {/* Google Login */}
-                    <button className="w-full bg-[#131d23] hover:bg-[#18242b] border border-[#1f2e36] hover:border-slate-700 rounded-xl py-3 flex items-center justify-center gap-3 transition-all duration-300 group/google">
+                    <button 
+                        type="button"
+                        onClick={() => setShowDevModal(true)}
+                        className="w-full bg-[#131d23] hover:bg-[#18242b] border border-[#1f2e36] hover:border-slate-700 rounded-xl py-3 flex items-center justify-center gap-3 transition-all duration-300 group/google"
+                    >
                         <svg className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24">
                             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -190,7 +195,11 @@ export default function Login({ status, canResetPassword }) {
                     </div>
                 </div>
 
-            </div >
-        </div >
+                <DevelopmentModal 
+                    isOpen={showDevModal} 
+                    onClose={() => setShowDevModal(false)} 
+                />
+            </div>
+        </div>
     );
 }

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { Eye, EyeOff, Mail, Lock, User, UserPlus, Sparkles } from 'lucide-react';
+import DevelopmentModal from '@/Components/DevelopmentModal';
 
 export default function Register() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [showDevModal, setShowDevModal] = useState(false);
 
     return (
         <div className="min-h-screen bg-jual-bg text-jual-text-main font-sans selection:bg-jual-green selection:text-white bg-grid-pattern relative flex justify-center items-center p-4">
@@ -123,7 +125,7 @@ export default function Register() {
                                 </span>
                             </div>
                             <label htmlFor="terms" className="ml-3 text-[11px] text-slate-400 cursor-pointer group-hover/check:text-slate-300 transition-colors leading-tight">
-                                Saya setuju dengan <Link href="#" className="text-emerald-500 hover:underline">Syarat & Ketentuan</Link> serta <Link href="#" className="text-emerald-500 hover:underline">Kebijakan Privasi</Link> yang berlaku.
+                                Saya setuju dengan <Link href={route('terms')} className="text-emerald-500 hover:underline">Syarat & Ketentuan</Link> serta <Link href={route('privacy')} className="text-emerald-500 hover:underline">Kebijakan Privasi</Link> yang berlaku.
                             </label>
                         </div>
 
@@ -146,7 +148,11 @@ export default function Register() {
                     </div>
 
                     {/* Google Signup */}
-                    <button className="w-full bg-[#131d23] hover:bg-[#18242b] border border-[#1f2e36] rounded-xl py-2.5 flex items-center justify-center gap-3 transition-all duration-300 group/google">
+                    <button 
+                        type="button"
+                        onClick={() => setShowDevModal(true)}
+                        className="w-full bg-[#131d23] hover:bg-[#18242b] border border-[#1f2e36] rounded-xl py-2.5 flex items-center justify-center gap-3 transition-all duration-300 group/google"
+                    >
                         <svg className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24">
                             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -166,6 +172,11 @@ export default function Register() {
                         </p>
                     </div>
                 </div>
+
+                <DevelopmentModal 
+                    isOpen={showDevModal} 
+                    onClose={() => setShowDevModal(false)} 
+                />
             </div>
         </div>
     );
