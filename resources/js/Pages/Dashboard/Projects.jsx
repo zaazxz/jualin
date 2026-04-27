@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { FolderOpen, Search, Star, Calendar, ExternalLink, Download, Trash2, ArrowRight, LayoutTemplate, MoreVertical } from 'lucide-react';
+import { FolderOpen, Search, Star, Calendar, ExternalLink, Download, Trash2, ArrowRight, LayoutTemplate, MoreVertical, PenTool } from 'lucide-react';
 import Layout from '@/Layouts/Dashboard/Layout';
 
 export default function Projects({ sales }) {
     const [searchQuery, setSearchQuery] = useState('');
-    
+
     const { delete: destroy } = useForm();
 
     const handleDelete = (id, e) => {
@@ -24,7 +24,7 @@ export default function Projects({ sales }) {
         let template = { bg_color: '#ffffff', text_color: '#1e293b' };
         try {
             template = typeof item.template === 'string' ? JSON.parse(item.template) : (item.template || template);
-        } catch (e) {}
+        } catch (e) { }
 
         const fullHtml = `<!DOCTYPE html>
 <html lang="id">
@@ -55,7 +55,7 @@ export default function Projects({ sales }) {
         URL.revokeObjectURL(url);
     };
 
-    const filteredSales = sales.filter(item => 
+    const filteredSales = sales.filter(item =>
         item.product_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (item.product_info?.description && item.product_info.description.toLowerCase().includes(searchQuery.toLowerCase()))
     );
@@ -63,14 +63,14 @@ export default function Projects({ sales }) {
     const getTemplateName = (templateData) => {
         if (!templateData) return 'Modern';
         if (typeof templateData === 'object') return templateData.name || templateData.NAME || templateData.id || templateData.ID || 'Modern';
-        
+
         try {
             if (templateData.startsWith('{')) {
                 const parsed = JSON.parse(templateData);
                 return parsed.name || parsed.NAME || parsed.id || parsed.ID || 'Modern';
             }
-        } catch (e) {}
-        
+        } catch (e) { }
+
         if (templateData.length > 20) return 'Modern';
         return templateData;
     };
@@ -90,11 +90,11 @@ export default function Projects({ sales }) {
                             <p className="text-xs text-jual-text-muted mt-0.5">Kelola semua halaman penjualan yang telah AI buatkan untuk Anda</p>
                         </div>
                     </div>
-                    
+
                     <div className="relative">
                         <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             placeholder="Cari nama produk atau deskripsi..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -105,16 +105,16 @@ export default function Projects({ sales }) {
 
                 <div className="bg-jual-card border border-jual-border rounded-3xl overflow-hidden shadow-2xl relative">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
-                    
+
                     <div className="overflow-x-auto relative z-10 scrollbar-hide">
-                        <table className="w-full text-left border-collapse table-fixed min-w-[800px]">
+                        <table className="w-full text-left border-collapse table-fixed min-w-[900px]">
                             <thead>
                                 <tr className="border-b border-[#1f2e36] bg-[#0a0f12]/50">
-                                    <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest w-2/5">Info Produk</th>
-                                    <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest w-1/5">Template</th>
-                                    <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest w-32">Skor AI</th>
-                                    <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest w-32">Tanggal Dibuat</th>
-                                    <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest w-32 text-right">Aksi</th>
+                                    <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest w-[35%]">Info Produk</th>
+                                    <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest w-[15%]">Template</th>
+                                    <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest w-[15%]">Skor AI</th>
+                                    <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest w-[15%]">Tanggal Dibuat</th>
+                                    <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest w-[20%] text-right">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[#1f2e36]">
@@ -153,27 +153,34 @@ export default function Projects({ sales }) {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <a 
-                                                        href={route('sales.preview', item.slug)} 
-                                                        target="_blank" 
+                                                <div className="flex items-center justify-end gap-3">
+                                                    <a
+                                                        href={route('sales.preview', item.slug)}
+                                                        target="_blank"
                                                         rel="noreferrer"
-                                                        className="w-8 h-8 rounded-lg bg-[#131d23] hover:bg-blue-500/10 border border-[#1f2e36] hover:border-blue-500/30 flex items-center justify-center text-slate-400 hover:text-blue-400 transition-all group/btn"
+                                                        className="w-10 h-10 flex-shrink-0 rounded-xl bg-[#131d23] hover:bg-blue-500/10 border border-[#1f2e36] hover:border-blue-500/30 flex items-center justify-center text-slate-400 hover:text-blue-400 transition-all group/btn"
                                                         title="Live Preview"
                                                     >
                                                         <ExternalLink className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
                                                     </a>
-                                                    <button 
+                                                    <Link
+                                                        href={route('dashboard.ai-generator', item.id)}
+                                                        className="w-10 h-10 flex-shrink-0 rounded-xl bg-[#131d23] hover:bg-amber-500/10 border border-[#1f2e36] hover:border-amber-500/30 flex items-center justify-center text-slate-400 hover:text-amber-400 transition-all group/btn"
+                                                        title="Edit / Re-generate"
+                                                    >
+                                                        <PenTool className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
+                                                    </Link>
+                                                    <button
                                                         onClick={() => handleDownload(item)}
-                                                        className="w-8 h-8 rounded-lg bg-[#131d23] hover:bg-emerald-500/10 border border-[#1f2e36] hover:border-emerald-500/30 flex items-center justify-center text-slate-400 hover:text-emerald-400 transition-all group/btn"
+                                                        className="w-10 h-10 flex-shrink-0 rounded-xl bg-[#131d23] hover:bg-emerald-500/10 border border-[#1f2e36] hover:border-emerald-500/30 flex items-center justify-center text-slate-400 hover:text-emerald-400 transition-all group/btn"
                                                         title="Download HTML"
                                                     >
                                                         <Download className="w-4 h-4 group-hover/btn:-translate-y-0.5 transition-transform" />
                                                     </button>
-                                                    <div className="w-px h-4 bg-[#1f2e36] mx-1"></div>
-                                                    <button 
+                                                    <div className="w-px h-6 bg-[#1f2e36] mx-1 flex-shrink-0"></div>
+                                                    <button
                                                         onClick={(e) => handleDelete(item.id, e)}
-                                                        className="w-8 h-8 rounded-lg bg-[#131d23] hover:bg-red-500/10 border border-[#1f2e36] hover:border-red-500/30 flex items-center justify-center text-slate-400 hover:text-red-400 transition-all group/btn"
+                                                        className="w-10 h-10 flex-shrink-0 rounded-xl bg-[#131d23] hover:bg-red-500/10 border border-[#1f2e36] hover:border-red-500/30 flex items-center justify-center text-slate-400 hover:text-red-400 transition-all group/btn"
                                                         title="Hapus Proyek"
                                                     >
                                                         <Trash2 className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />

@@ -187,6 +187,12 @@ export default function Dashboard({ sales }) {
                                     >
                                         Live Preview
                                     </a>
+                                    <Link 
+                                        href={route('dashboard.ai-generator', item.id)}
+                                        className="bg-[#131d23] hover:bg-amber-500/10 text-[10px] font-bold text-slate-400 hover:text-amber-400 px-4 py-2 rounded-lg transition-all border border-jual-border hover:border-amber-500/30"
+                                    >
+                                        Edit
+                                    </Link>
                                     <button 
                                         onClick={() => handleDownloadFromDashboard(item)}
                                         className="bg-emerald-500/10 hover:bg-emerald-500 text-[10px] font-bold text-emerald-500 hover:text-slate-900 px-4 py-2 rounded-lg transition-all border border-emerald-500/20 hover:border-emerald-500"
