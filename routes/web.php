@@ -33,7 +33,7 @@ Route::get('/privacy', function () {
 })->name('privacy');
 
 // Authenticated only
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     
     // Dashboard 
     Route::get('/dashboard', function () {
