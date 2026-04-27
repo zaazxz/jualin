@@ -1,19 +1,38 @@
-import React from 'react';
-import { Head, Link } from '@inertiajs/react';
+import React, { useState, useEffect } from 'react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { Rocket, FileText, Calendar, Clock, Eye, ShoppingCart, Plus, MoreVertical, ExternalLink, Sparkles, User } from 'lucide-react';
 import Layout from '@/Layouts/Dashboard/Layout';
+import LoginSuccessModal from '@/Components/Dashboard/LoginSuccessModal';
 
 export default function Dashboard() {
+    const { auth } = usePage().props;
+    const [showWelcome, setShowWelcome] = useState(false);
+
+    useEffect(() => {
+        // Show welcome modal if redirected from login (mocked for now with a simple check)
+        const hasShownWelcome = sessionStorage.getItem('hasShownWelcome');
+        if (!hasShownWelcome) {
+            setShowWelcome(true);
+            sessionStorage.setItem('hasShownWelcome', 'true');
+        }
+    }, []);
+
     return (
         <Layout>
             <Head title="Dashboard" />
+
+            <LoginSuccessModal 
+                isOpen={showWelcome} 
+                onClose={() => setShowWelcome(false)} 
+                userName={auth.user.name}
+            />
 
             {/* Welcome Banner */}
             <div className="bg-jual-card border border-jual-border rounded-xl p-8 mb-8 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-jual-green/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
                 <div className="relative z-10">
                     <h1 className="text-3xl font-bold text-jual-green mb-2 flex items-center gap-3">
-                        Bismillah, Mari Mulai Jualan <Rocket className="w-8 h-8 text-jual-green fill-jual-green/20" />
+                        Bismillah, Mari Mulai Jualan {auth.user.name.split(' ')[0]} <Rocket className="w-8 h-8 text-jual-green fill-jual-green/20" />
                     </h1>
                     <p className="text-sm text-jual-text-muted max-w-xl mb-6 leading-relaxed">
                         Bangun halaman penjualan yang elegan dan berkonversi tinggi hanya dalam

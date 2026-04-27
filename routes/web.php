@@ -40,10 +40,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('Dashboard/Index');
     })->name('dashboard');
 
-});
+    Route::get('/dashboard/ai-generator', function () {
+        return Inertia::render('Dashboard/AiGenerator');
+    })->name('dashboard.ai-generator');
 
-// Route::get('/dashboard', function () {
-//     return Inertia::render('Dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
+    Route::get('/dashboard/templates', function () {
+        return Inertia::render('Dashboard/Templates');
+    })->name('dashboard.templates');
+
+    Route::get('/dashboard/analytics', function () {
+        return Inertia::render('Dashboard/Analytics');
+    })->name('dashboard.analytics');
+
+    Route::get('/dashboard/settings', function () {
+        return Inertia::render('Dashboard/Settings');
+    })->name('dashboard.settings');
+
+});
 
 require __DIR__.'/auth.php';

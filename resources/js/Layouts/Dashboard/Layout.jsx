@@ -9,11 +9,11 @@ export default function Layout({ children }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const navItems = [
-        { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-        { name: 'AI Generator', href: '#', icon: Sparkles },
-        { name: 'Templates', href: '#', icon: LayoutTemplate },
-        { name: 'Analytics', href: '#', icon: BarChart3 },
-        { name: 'Settings', href: '#', icon: Settings },
+        { name: 'Dashboard', href: route('dashboard'), icon: LayoutDashboard },
+        { name: 'AI Generator', href: route('dashboard.ai-generator'), icon: Sparkles },
+        { name: 'Templates', href: route('dashboard.templates'), icon: LayoutTemplate },
+        { name: 'Analytics', href: route('dashboard.analytics'), icon: BarChart3 },
+        { name: 'Settings', href: route('dashboard.settings'), icon: Settings },
     ];
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
