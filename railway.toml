@@ -2,7 +2,7 @@
 builder = "RAILPACK"
 
 [deploy]
-healthcheckPath = "/"
+healthcheckPath = "/up"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
