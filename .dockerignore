@@ -1,0 +1,49 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Docker files
+Dockerfile
+.dockerignore
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Development dependencies and tooling
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Build artifacts
+public/hot
+public/build
+
+# Laravel storage (generated at runtime)
+storage/framework/cache
+storage/framework/sessions
+storage/framework/views
+storage/logs
+
+# Tests
+tests
+phpunit.xml
+.phpunit.result.cache
+
+# IDE and OS files
+.idea
+.vscode
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Railway / Nixpacks config (replaced by Dockerfile)
+railway.toml
+nixpacks.toml
+
+# Misc
+README.md
+CHANGELOG.md
