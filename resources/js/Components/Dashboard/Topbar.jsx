@@ -1,12 +1,22 @@
 import React, { useState } from 'react'
 import { Link, usePage } from '@inertiajs/react'
-import { Moon, Bell, User, Menu, ChevronDown, Settings, LogOut, Shield } from 'lucide-react'
+import { Moon, Sun, Bell, User, Menu, ChevronDown, Settings, LogOut, Shield, Globe } from 'lucide-react'
 import DevelopmentModal from '@/Components/DevelopmentModal'
+import { useAppStore } from '@/store/useAppStore'
 
 export default function Topbar({ toggleSidebar }) {
     const { auth } = usePage().props;
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+    const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
     const [showDevModal, setShowDevModal] = useState(false);
+
+    const { theme, toggleTheme, language, setLanguage, t } = useAppStore();
+
+    const languages = [
+        { code: 'id', label: 'Indonesia' },
+        { code: 'en', label: 'English' },
+        { code: 'ms', label: 'Malaysia' }
+    ];
 
     return (
         <>
@@ -18,19 +28,53 @@ export default function Topbar({ toggleSidebar }) {
                     >
                         <Menu className="w-6 h-6" />
                     </button>
-                    <div className="text-sm font-medium text-slate-300 hidden sm:flex items-center gap-2">
+                    <div className="text-sm font-medium text-jual-text-muted hidden sm:flex items-center gap-2">
                         <span className="text-jual-text-muted">Halo,</span>
-                        <span className="text-white">{auth.user.name}</span>
+                        <span className="text-jual-text-main">{auth.user.name}</span>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-3 lg:gap-5">
+                    {/* Language Selector */}
+                    <div className="relative">
+                        <button
+                            onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
+                            className="flex items-center gap-2 text-jual-text-muted hover:text-emerald-400 transition-colors px-3 py-2 hover:bg-jual-card rounded-lg"
+                        >
+                            <Globe className="w-5 h-5" />
+                            <span className="text-xs font-bold uppercase hidden md:block">{language}</span>
+                        </button>
+                        
+                        {isLangMenuOpen && (
+                            <>
+                                <div className="fixed inset-0 z-10" onClick={() => setIsLangMenuOpen(false)}></div>
+                                <div className="absolute right-0 mt-3 w-40 bg-jual-card border border-jual-border rounded-2xl shadow-xl overflow-hidden z-20 animate-in fade-in slide-in-from-top-2 duration-200">
+                                    <div className="p-2">
+                                        {languages.map(lang => (
+                                            <button
+                                                key={lang.code}
+                                                onClick={() => {
+                                                    setLanguage(lang.code);
+                                                    setIsLangMenuOpen(false);
+                                                }}
+                                                className={`w-full text-left px-3 py-2.5 rounded-xl text-sm transition-colors ${language === lang.code ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold' : 'text-jual-text-main hover:bg-jual-input'}`}
+                                            >
+                                                {lang.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
+
                     {/* Dark Mode Toggle */}
                     <button
-                        onClick={() => setShowDevModal(true)}
+                        onClick={toggleTheme}
                         className="text-jual-text-muted hover:text-emerald-400 transition-colors p-2 hover:bg-jual-card rounded-lg"
+                        title={theme === 'dark' ? t('light_mode') : t('dark_mode')}
                     >
-                        <Moon className="w-5 h-5" />
+                        {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                     </button>
 
                     {/* Notifications */}
@@ -52,7 +96,7 @@ export default function Topbar({ toggleSidebar }) {
                                 <User className="w-5 h-5 text-emerald-500" />
                             </div>
                             <div className="hidden md:block text-left mr-1">
-                                <p className="text-xs font-bold text-white leading-none">{auth.user.name}</p>
+                                <p className="text-xs font-bold text-jual-text-main leading-none">{auth.user.name}</p>
                                 <p className="text-[10px] text-jual-text-muted mt-1 leading-none">Member</p>
                             </div>
                             <ChevronDown className={`w-4 h-4 text-jual-text-muted transition-transform duration-300 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
@@ -65,19 +109,15 @@ export default function Topbar({ toggleSidebar }) {
                                     className="fixed inset-0 z-10"
                                     onClick={() => setIsUserMenuOpen(false)}
                                 ></div>
-                                <div className="absolute right-0 mt-3 w-56 bg-[#0f171c] border border-jual-border rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-hidden z-20 animate-in fade-in slide-in-from-top-2 duration-200">
-                                    <div className="p-4 border-b border-jual-border">
-                                        <p className="text-xs font-bold text-jual-text-muted uppercase tracking-widest">Akun Saya</p>
-                                        <p className="text-sm text-white mt-1 truncate">{auth.user.email}</p>
+                                <div className="absolute right-0 mt-3 w-56 bg-jual-card border border-jual-border rounded-2xl shadow-xl overflow-hidden z-20 animate-in fade-in slide-in-from-top-2 duration-200">
+                                    <div className="p-4 border-b border-jual-border bg-jual-bg/50">
+                                        <p className="text-xs font-bold text-jual-text-muted uppercase tracking-widest">{t('my_account')}</p>
+                                        <p className="text-sm text-jual-text-main mt-1 truncate font-medium">{auth.user.email}</p>
                                     </div>
                                     <div className="p-2">
-                                        <Link href={route('profile.edit')} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-300 hover:bg-emerald-500/10 hover:text-emerald-400 transition-colors group">
-                                            <Settings className="w-4 h-4 text-slate-500 group-hover:text-emerald-400" />
-                                            Pengaturan
-                                        </Link>
-                                        <Link href="#" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-300 hover:bg-emerald-500/10 hover:text-emerald-400 transition-colors group">
-                                            <Shield className="w-4 h-4 text-slate-500 group-hover:text-emerald-400" />
-                                            Keamanan
+                                        <Link href={route('profile.edit')} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-jual-text-muted hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors group">
+                                            <Settings className="w-4 h-4 text-jual-text-muted group-hover:text-emerald-600 dark:group-hover:text-emerald-400" />
+                                            {t('settings')}
                                         </Link>
                                     </div>
                                     <div className="p-2 border-t border-jual-border">
@@ -85,10 +125,10 @@ export default function Topbar({ toggleSidebar }) {
                                             href={route('logout')}
                                             method="post"
                                             as="button"
-                                            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-400 hover:bg-red-500/10 transition-colors group text-left"
+                                            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-500 hover:bg-red-500/10 transition-colors group text-left font-medium"
                                         >
                                             <LogOut className="w-4 h-4" />
-                                            Keluar
+                                            {t('logout')}
                                         </Link>
                                     </div>
                                 </div>

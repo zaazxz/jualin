@@ -1,7 +1,10 @@
 import React, { useEffect } from 'react';
 import { X, CheckCircle2, PartyPopper, ArrowRight } from 'lucide-react';
+import { useAppStore } from '@/store/useAppStore';
 
 export default function LoginSuccessModal({ isOpen, onClose, userName }) {
+    const { t } = useAppStore();
+
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
@@ -21,19 +24,19 @@ export default function LoginSuccessModal({ isOpen, onClose, userName }) {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             {/* Backdrop */}
             <div 
-                className="absolute inset-0 bg-[#070b0a]/80 backdrop-blur-md animate-in fade-in duration-500"
+                className="absolute inset-0 bg-black/60 backdrop-blur-md animate-in fade-in duration-500"
                 onClick={onClose}
             ></div>
 
             {/* Modal Content */}
-            <div className="relative w-full max-w-sm bg-[#0f171c] border border-emerald-500/20 rounded-3xl shadow-[0_0_80px_rgba(16,185,129,0.15)] overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-10 duration-500">
+            <div className="relative w-full max-w-sm bg-jual-card border border-jual-border rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-10 duration-500">
                 {/* Top Glow Decor */}
                 <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent"></div>
                 
                 {/* Close Button */}
                 <button 
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors p-1"
+                    className="absolute top-4 right-4 text-jual-text-muted hover:text-jual-text-main transition-colors p-1"
                 >
                     <X className="w-4 h-4" />
                 </button>
@@ -48,16 +51,16 @@ export default function LoginSuccessModal({ isOpen, onClose, userName }) {
                         <div className="absolute inset-0 bg-emerald-500/20 blur-2xl rounded-full -z-10 animate-pulse"></div>
                     </div>
 
-                    <h3 className="text-2xl font-bold text-white mb-2">Login Berhasil!</h3>
-                    <p className="text-slate-400 text-sm leading-relaxed mb-8">
-                        Selamat datang kembali, <span className="text-emerald-400 font-bold">{userName}</span>. Senang melihat Anda lagi! Mari kita buat sesuatu yang hebat hari ini.
+                    <h3 className="text-2xl font-bold text-jual-text-main mb-2">{t('login_success_title')}</h3>
+                    <p className="text-jual-text-muted text-sm leading-relaxed mb-8">
+                        {t('welcome')}, <span className="text-emerald-500 font-bold">{userName}</span>. {t('happy_to_see_you')}
                     </p>
 
                     <button 
                         onClick={onClose}
-                        className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-900 font-bold py-3.5 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 group"
+                        className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-3.5 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 group shadow-[0_4px_20px_rgba(16,185,129,0.2)]"
                     >
-                        Masuk ke Dashboard
+                        {t('enter_dashboard')}
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                     

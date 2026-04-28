@@ -1,7 +1,10 @@
 import React, { useEffect } from 'react';
 import { X, Sparkles, Construction } from 'lucide-react';
+import { useAppStore } from '@/store/useAppStore';
 
 export default function DevelopmentModal({ isOpen, onClose }) {
+    const { t } = useAppStore();
+
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
@@ -16,19 +19,19 @@ export default function DevelopmentModal({ isOpen, onClose }) {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
             {/* Backdrop */}
             <div 
-                className="absolute inset-0 bg-[#070b0a]/80 backdrop-blur-sm animate-in fade-in duration-300"
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
                 onClick={onClose}
             ></div>
 
             {/* Modal Content */}
-            <div className="relative w-full max-w-md bg-[#0f171c] border border-[#1a272e] rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden animate-in zoom-in-95 fade-in duration-300">
+            <div className="relative w-full max-w-md bg-jual-card border border-jual-border rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 fade-in duration-300">
                 {/* Top Glow Decor */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"></div>
                 
                 {/* Close Button */}
                 <button 
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors"
+                    className="absolute top-4 right-4 text-jual-text-muted hover:text-jual-text-main transition-colors"
                 >
                     <X className="w-5 h-5" />
                 </button>
@@ -40,24 +43,29 @@ export default function DevelopmentModal({ isOpen, onClose }) {
                             <Construction className="w-10 h-10 text-emerald-500" />
                         </div>
                         {/* Pulse effect */}
-                        <div className="absolute inset-0 bg-emerald-500/20 blur-2xl rounded-full -z-10 animate-pulse"></div>
+                        <div className="absolute inset-0 bg-emerald-500/10 blur-2xl rounded-full -z-10 animate-pulse"></div>
                     </div>
 
-                    <h3 className="text-xl font-bold text-white mb-3">Fitur Sedang Disiapkan!</h3>
-                    <div className="inline-flex items-center space-x-2 bg-jual-card border border-jual-border rounded-full px-3 py-1 mb-4">
+                    <h3 className="text-xl font-bold text-jual-text-main mb-3">{t('feature_under_development_title')}</h3>
+                    <div className="inline-flex items-center space-x-2 bg-jual-input border border-jual-border rounded-full px-3 py-1 mb-4">
                         <Sparkles className="w-3 h-3 text-emerald-500" />
-                        <span className="text-[10px] font-bold tracking-wider text-emerald-500 uppercase">Coming Soon</span>
+                        <span className="text-[10px] font-bold tracking-wider text-emerald-500 uppercase">{t('coming_soon')}</span>
                     </div>
                     
-                    <p className="text-slate-400 text-sm leading-relaxed mb-8">
-                        Fitur yang Anda pilih saat ini sedang dalam tahap <span className="text-emerald-400 font-medium italic">pengembangan intensif</span> oleh tim kami untuk memastikan kualitas dan kenyamanan terbaik bagi Anda.
+                    <p className="text-jual-text-muted text-sm leading-relaxed mb-8">
+                        {t('feature_dev_desc').split(t('intensive_development')).map((part, i, arr) => (
+                            <React.Fragment key={i}>
+                                {part}
+                                {i < arr.length - 1 && <span className="text-emerald-500 font-medium italic">{t('intensive_development')}</span>}
+                            </React.Fragment>
+                        ))}
                     </p>
 
                     <button 
                         onClick={onClose}
-                        className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-900 font-bold py-3.5 rounded-xl transition-all duration-300 shadow-[0_4px_20px_rgba(16,185,129,0.2)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.3)]"
+                        className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-3.5 rounded-xl transition-all duration-300 shadow-[0_4px_20px_rgba(16,185,129,0.2)]"
                     >
-                        Saya Mengerti
+                        {t('i_understand')}
                     </button>
                 </div>
             </div>

@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { Head, usePage, useForm } from '@inertiajs/react';
 import { Settings as SettingsIcon, User, Lock, Bell, Palette, Shield, ChevronRight, Save, Loader2, CheckCircle } from 'lucide-react';
 import Layout from '@/Layouts/Dashboard/Layout';
+import { useAppStore } from '@/store/useAppStore';
 
 export default function Settings() {
     const { auth } = usePage().props;
     const [activeSection, setActiveSection] = useState('profile');
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const { t } = useAppStore();
 
     const { data, setData, patch, processing, errors, recentlySuccessful } = useForm({
         name: auth.user.name,
@@ -24,10 +26,10 @@ export default function Settings() {
     });
 
     const sections = [
-        { id: 'profile', label: 'Profil Saya', icon: User, desc: 'Kelola informasi pribadi dan publik Anda' },
-        { id: 'security', label: 'Keamanan', icon: Lock, desc: 'Amankan akun dengan 2FA dan kata sandi' },
-        { id: 'notifications', label: 'Notifikasi', icon: Bell, desc: 'Atur cara kami menghubungi Anda' },
-        { id: 'appearance', label: 'Tampilan', icon: Palette, desc: 'Kustomisasi tema dan layout dashboard' },
+        { id: 'profile', label: t('my_profile'), icon: User, desc: t('my_profile_desc') },
+        { id: 'security', label: t('security'), icon: Lock, desc: t('security_desc') },
+        { id: 'notifications', label: t('notifications'), icon: Bell, desc: t('notifications_desc') },
+        { id: 'appearance', label: t('appearance'), icon: Palette, desc: t('appearance_desc') },
     ];
 
     const handleUpdateProfile = (e) => {
@@ -47,14 +49,14 @@ export default function Settings() {
 
     return (
         <Layout>
-            <Head title="Pengaturan Sistem" />
+            <Head title={t('system_settings')} />
 
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="flex items-center gap-3 mb-8">
                     <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center border border-emerald-500/20">
                         <SettingsIcon className="w-5 h-5 text-emerald-500" />
                     </div>
-                    <h1 className="text-2xl font-bold text-white">Pengaturan Sistem</h1>
+                    <h1 className="text-2xl font-bold text-jual-text-main">{t('system_settings')}</h1>
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-10">
@@ -64,22 +66,20 @@ export default function Settings() {
                             <button
                                 key={s.id}
                                 onClick={() => setActiveSection(s.id)}
-                                className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 text-left border ${
-                                    activeSection === s.id 
-                                    ? 'bg-emerald-500/5 border-emerald-500/20 ring-1 ring-emerald-500/10' 
-                                    : 'hover:bg-jual-card border-transparent hover:border-jual-border group'
-                                }`}
+                                className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 text-left border ${activeSection === s.id
+                                        ? 'bg-emerald-500/5 border-emerald-500/20 ring-1 ring-emerald-500/10'
+                                        : 'hover:bg-jual-card border-transparent hover:border-jual-border group'
+                                    }`}
                             >
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
-                                    activeSection === s.id ? 'bg-emerald-500 text-slate-900' : 'bg-slate-500/10 text-slate-500 group-hover:text-emerald-400'
-                                }`}>
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${activeSection === s.id ? 'bg-emerald-500 text-slate-900' : 'bg-jual-input text-jual-text-muted group-hover:text-emerald-400'
+                                    }`}>
                                     <s.icon className="w-5 h-5" />
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className={`text-sm font-bold ${activeSection === s.id ? 'text-white' : 'text-slate-400 group-hover:text-white'}`}>{s.label}</h3>
-                                    <p className="text-[10px] text-slate-600 font-medium">{s.desc}</p>
+                                    <h3 className={`text-sm font-bold ${activeSection === s.id ? 'text-jual-text-main' : 'text-jual-text-muted group-hover:text-jual-text-main'}`}>{s.label}</h3>
+                                    <p className="text-[10px] text-jual-text-muted font-medium">{s.desc}</p>
                                 </div>
-                                <ChevronRight className={`w-4 h-4 ${activeSection === s.id ? 'text-emerald-500' : 'text-slate-700 opacity-0 group-hover:opacity-100'}`} />
+                                <ChevronRight className={`w-4 h-4 ${activeSection === s.id ? 'text-emerald-500' : 'text-jual-text-muted opacity-0 group-hover:opacity-100'}`} />
                             </button>
                         ))}
                     </div>
@@ -90,12 +90,12 @@ export default function Settings() {
                             <>
                                 <form onSubmit={handleUpdateProfile} className="bg-jual-card border border-jual-border rounded-3xl p-8 relative overflow-hidden">
                                     <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
-                                    
-                                    <h2 className="text-xl font-bold text-white mb-8 pb-4 border-b border-jual-border flex items-center justify-between">
-                                        Informasi Profil
+
+                                    <h2 className="text-xl font-bold text-jual-text-main mb-8 pb-4 border-b border-jual-border flex items-center justify-between">
+                                        {t('profile_info')}
                                         {recentlySuccessful && (
                                             <span className="bg-emerald-500/10 text-emerald-500 text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1">
-                                                <CheckCircle className="w-3 h-3" /> Tersimpan
+                                                <CheckCircle className="w-3 h-3" /> {t('saved')}
                                             </span>
                                         )}
                                     </h2>
@@ -103,35 +103,35 @@ export default function Settings() {
                                     <div className="space-y-8 relative z-10">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                             <div className="space-y-2">
-                                                <label className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest ml-1">Nama Lengkap</label>
-                                                <input 
-                                                    type="text" 
+                                                <label className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest ml-1">{t('full_name')}</label>
+                                                <input
+                                                    type="text"
                                                     value={data.name}
                                                     onChange={e => setData('name', e.target.value)}
-                                                    className="w-full bg-[#131d23] border border-[#1f2e36] rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300"
+                                                    className="w-full bg-jual-input border border-jual-border rounded-xl px-4 py-3 text-sm text-jual-text-main focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300"
                                                 />
                                                 {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest ml-1">Alamat Email</label>
-                                                <input 
-                                                    type="email" 
+                                                <label className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest ml-1">{t('email_address')}</label>
+                                                <input
+                                                    type="email"
                                                     value={data.email}
                                                     onChange={e => setData('email', e.target.value)}
-                                                    className="w-full bg-[#131d23] border border-[#1f2e36] rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300"
+                                                    className="w-full bg-jual-input border border-jual-border rounded-xl px-4 py-3 text-sm text-jual-text-main focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300"
                                                 />
                                                 {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
                                             </div>
                                         </div>
 
                                         <div className="pt-6 border-t border-jual-border flex justify-end gap-3">
-                                            <button 
-                                                type="submit" 
+                                            <button
+                                                type="submit"
                                                 disabled={processing}
                                                 className="bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-900 font-bold px-8 py-3 rounded-xl text-sm flex items-center gap-2 transition-all shadow-[0_4px_15px_rgba(16,185,129,0.2)]"
                                             >
-                                                {processing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} 
-                                                Simpan Perubahan
+                                                {processing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                                {t('save_changes')}
                                             </button>
                                         </div>
                                     </div>
@@ -140,24 +140,24 @@ export default function Settings() {
                                 {/* Danger Zone */}
                                 <div className="mt-8 bg-red-500/5 border border-red-500/10 rounded-3xl p-8 group">
                                     <h3 className="text-sm font-bold text-red-500 mb-2 flex items-center gap-2">
-                                        <Shield className="w-4 h-4" /> Hapus Akun
+                                        <Shield className="w-4 h-4" /> {t('delete_account')}
                                     </h3>
                                     <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-                                        <p className="text-xs text-slate-500 max-w-sm">Tindakan ini permanen. Seluruh data, halaman, dan analitik Anda akan dihapus selamanya.</p>
-                                        <button 
+                                        <p className="text-xs text-jual-text-muted max-w-sm">{t('delete_account_desc')}</p>
+                                        <button
                                             onClick={() => setShowDeleteModal(true)}
                                             className="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white font-bold px-6 py-2.5 rounded-xl text-xs transition-all border border-red-500/20"
                                         >
-                                            Tutup Akun
+                                            {t('close_account_btn')}
                                         </button>
                                     </div>
                                 </div>
                             </>
                         ) : (
                             <div className="bg-jual-card border border-jual-border border-dashed rounded-3xl p-12 text-center animate-in fade-in duration-500">
-                                <SettingsIcon className="w-12 h-12 text-slate-600 mx-auto mb-4 animate-spin-slow" />
-                                <h3 className="text-lg font-bold text-white mb-2">Segera Hadir</h3>
-                                <p className="text-sm text-slate-500">Fitur pengaturan ini sedang dalam tahap pengembangan dan akan segera tersedia.</p>
+                                <SettingsIcon className="w-12 h-12 text-jual-text-muted mx-auto mb-4 animate-spin-slow" />
+                                <h3 className="text-lg font-bold text-jual-text-main mb-2">{t('coming_soon')}</h3>
+                                <p className="text-sm text-jual-text-muted">{t('coming_soon_desc')}</p>
                             </div>
                         )}
                     </div>
@@ -169,12 +169,12 @@ export default function Settings() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
                     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowDeleteModal(false)}></div>
                     <div className="bg-jual-card border border-jual-border rounded-3xl p-8 shadow-2xl relative z-10 w-full max-w-md animate-in zoom-in-95 duration-200">
-                        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                        <h2 className="text-xl font-bold text-jual-text-main flex items-center gap-2">
                             <Shield className="w-5 h-5 text-red-500" />
-                            Konfirmasi Hapus Akun
+                            {t('confirm_delete_account')}
                         </h2>
-                        <p className="mt-4 text-sm text-slate-400 leading-relaxed">
-                            Setelah akun Anda dihapus, semua sumber daya dan datanya akan dihapus secara permanen. Masukkan kata sandi Anda untuk mengonfirmasi.
+                        <p className="mt-4 text-sm text-jual-text-muted leading-relaxed">
+                            {t('confirm_delete_account_desc')}
                         </p>
 
                         <div className="mt-6">
@@ -183,23 +183,23 @@ export default function Settings() {
                                 id="password_input"
                                 value={deleteData.password}
                                 onChange={(e) => setDeleteData('password', e.target.value)}
-                                className="w-full bg-[#131d23] border border-[#1f2e36] rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-red-500/50 focus:ring-2 focus:ring-red-500/20"
-                                placeholder="Kata Sandi Anda"
+                                className="w-full bg-jual-input border border-jual-border rounded-xl px-4 py-3 text-sm text-jual-text-main focus:outline-none focus:border-red-500/50 focus:ring-2 focus:ring-red-500/20"
+                                placeholder={t('your_password')}
                             />
                             {errors.password && <p className="text-xs text-red-500 mt-2 font-medium">{errors.password}</p>}
                         </div>
 
                         <div className="mt-8 flex justify-end gap-3">
-                            <button onClick={() => setShowDeleteModal(false)} className="px-5 py-2.5 text-sm font-bold text-slate-400 hover:text-white transition-colors">
-                                Batal
+                            <button onClick={() => setShowDeleteModal(false)} className="px-5 py-2.5 text-sm font-bold text-jual-text-muted hover:text-jual-text-main transition-colors">
+                                {t('cancel')}
                             </button>
-                            <button 
-                                onClick={handleDeleteAccount} 
+                            <button
+                                onClick={handleDeleteAccount}
                                 disabled={deleting}
                                 className="bg-red-500 hover:bg-red-400 disabled:opacity-50 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition-all shadow-[0_4px_15px_rgba(239,68,68,0.2)] flex items-center gap-2"
                             >
                                 {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                                {deleting ? 'Menghapus...' : 'Hapus Permanen'}
+                                {deleting ? t('deleting') : t('delete_permanently')}
                             </button>
                         </div>
                     </div>
