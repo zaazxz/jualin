@@ -4,7 +4,7 @@ builder = "RAILPACK"
 buildArgs = ["COMPOSER_INSTALL_ARGS=--no-dev --optimize-autoloader"]
 
 [deploy]
-port = 80
+port = 8080
 healthcheckPath = "/up"
 healthcheckTimeout = 120
 restartPolicyType = "on_failure"
