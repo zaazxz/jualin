@@ -22,6 +22,19 @@ Route::get('/up', function () {
     return response()->noContent();
 });
 
+// Rute darurat buat ngetes email (Hapus kalau sudah beres)
+Route::get('/test-email', function () {
+    try {
+        \Illuminate\Support\Facades\Mail::raw('Halo! Kalau kamu baca ini, berarti SMTP Jual.in sudah BERHASIL konek ke Gmail. 🚀', function ($message) {
+            $message->to(env('MAIL_FROM_ADDRESS'))
+                ->subject('Tes Koneksi SMTP Jual.in');
+        });
+        return 'Sip! Email berhasil terkirim. Cek inbox kamu (atau folder Spam).';
+    } catch (\Exception $e) {
+        return 'Waduh Gagal! Errornya: ' . $e->getMessage();
+    }
+});
+
 Route::get('/', function () {
     return Inertia::render('Welcome');
 });
