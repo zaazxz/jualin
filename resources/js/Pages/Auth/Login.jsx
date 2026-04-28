@@ -161,7 +161,13 @@ export default function Login({ status, canResetPassword }) {
                         <div className="space-y-2">
                             <div className="flex justify-between items-center ml-1">
                                 <label className="text-[10px] font-bold text-emerald-600 dark:text-emerald-500/90 uppercase tracking-widest">{t('password')}</label>
-                                <Link href={route('password.request')} className="text-[10px] font-bold text-amber-600 hover:text-amber-500 dark:text-yellow-600 dark:hover:text-yellow-500 uppercase tracking-wider transition-colors">{t('forgot_password')}</Link>
+                                <button 
+                                    type="button"
+                                    onClick={() => setShowDevModal(true)}
+                                    className="text-[10px] font-bold text-amber-600 hover:text-amber-500 dark:text-yellow-600 dark:hover:text-yellow-500 uppercase tracking-wider transition-colors"
+                                >
+                                    {t('forgot_password')}
+                                </button>
                             </div>
                             <div className="relative group/input">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
