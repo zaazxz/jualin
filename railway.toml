@@ -7,5 +7,5 @@ port = 8080
 healthcheckPath = "/up"
 healthcheckTimeout = 120
 restartPolicyType = "on_failure"
-# Jalankan migrasi dan nyalakan worker di background agar registrasi cepat
-startCommand = "php artisan migrate --force --seed && (php artisan queue:work --tries=3 --backoff=3 & /start-container.sh)"
+# Jalankan migrasi saja, jangan seed ulang tiap startup biar nggak error duplicate
+startCommand = "php artisan migrate --force && (php artisan queue:work --tries=3 --backoff=3 & /start-container.sh)"
