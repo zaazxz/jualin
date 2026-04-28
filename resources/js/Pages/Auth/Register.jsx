@@ -55,7 +55,7 @@ export default function Register() {
                         <Globe className="w-5 h-5" />
                         <span className="text-xs font-bold uppercase hidden md:block">{language}</span>
                     </button>
-                    
+
                     {isLangMenuOpen && (
                         <>
                             <div className="fixed inset-0 z-10" onClick={() => setIsLangMenuOpen(false)}></div>
