@@ -3,11 +3,6 @@
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
-if ($_SERVER['REQUEST_URI'] === '/up') {
-    http_response_code(200);
-    exit;
-}
-
 define('LARAVEL_START', microtime(true));
 
 /*

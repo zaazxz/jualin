@@ -1,10 +1,11 @@
 [build]
 builder = "RAILPACK"
-# Pastikan folder storage ada sebelum server jalan
-startCommand = "mkdir -p storage/framework/{sessions,views,cache,testing} storage/logs bootstrap/cache && chmod -R a+rw storage && /start-container.sh"
+buildArgs = ["COMPOSER_INSTALL_ARGS=--no-dev --optimize-autoloader"]
 
 [deploy]
 port = 8080
 healthcheckPath = "/up"
 healthcheckTimeout = 120
 restartPolicyType = "on_failure"
+# Jalankan migrasi dan nyalakan worker di background agar registrasi cepat
+startCommand = "php artisan migrate --force --seed && (php artisan queue:work --tries=3 --backoff=3 & /start-container.sh)"
