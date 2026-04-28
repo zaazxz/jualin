@@ -1,10 +1,10 @@
 [build]
 builder = "RAILPACK"
+# Tambahkan ini untuk mempercepat build composer
+buildArgs = ["COMPOSER_INSTALL_ARGS=--no-dev --optimize-autoloader"]
 
 [deploy]
 port = 80
 healthcheckPath = "/up"
-healthcheckTimeout = 300
+healthcheckTimeout = 120
 restartPolicyType = "on_failure"
-restartPolicyMaxRetries = 10
-startCommand = "/start-container.sh"
