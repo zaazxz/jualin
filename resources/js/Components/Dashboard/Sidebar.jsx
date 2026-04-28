@@ -3,11 +3,13 @@ import { Link, usePage } from '@inertiajs/react'
 import { X } from 'lucide-react'
 import { LayoutDashboard, Sparkles, LayoutTemplate, BarChart3, Settings, HelpCircle, LogOut } from 'lucide-react'
 import DevelopmentModal from '@/Components/DevelopmentModal'
-
+import { useAppStore } from '@/store/useAppStore'
 
 export default function Sidebar({ isSidebarOpen, toggleSidebar, navItems }) {
     const { url } = usePage();
     const [showDevModal, setShowDevModal] = useState(false);
+    const { t } = useAppStore();
+
     return (
         <>
             <aside className={`w-64 bg-jual-bg border-r border-jual-border flex flex-col fixed h-full z-40 transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
@@ -19,13 +21,13 @@ export default function Sidebar({ isSidebarOpen, toggleSidebar, navItems }) {
                         <div className="flex flex-col">
                             <span className="text-xl font-bold tracking-tight leading-none">
                                 <span className="text-jual-green">Jual</span>
-                                <span className="text-white">.in</span>
+                                <span className="text-jual-text-main">.in</span>
                             </span>
                             <span className="text-[9px] text-jual-text-muted mt-1 uppercase tracking-wider leading-none">One Stop Selling Solution</span>
                         </div>
                     </Link>
                     {/* Close button for mobile */}
-                    <button onClick={toggleSidebar} className="lg:hidden text-jual-text-muted hover:text-white">
+                    <button onClick={toggleSidebar} className="lg:hidden text-jual-text-muted hover:text-jual-text-main">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
@@ -43,9 +45,9 @@ export default function Sidebar({ isSidebarOpen, toggleSidebar, navItems }) {
                                         if (toggleSidebar) toggleSidebar();
                                         setShowDevModal(true);
                                     }}
-                                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-jual-text-muted hover:bg-jual-card hover:text-white transition-colors group w-full text-left"
+                                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-jual-text-muted hover:bg-jual-card hover:text-jual-text-main transition-colors group w-full text-left"
                                 >
-                                    <item.icon className="w-5 h-5 text-jual-text-muted group-hover:text-white" />
+                                    <item.icon className="w-5 h-5 text-jual-text-muted group-hover:text-jual-text-main" />
                                     {item.name}
                                 </button>
                             );
@@ -58,10 +60,10 @@ export default function Sidebar({ isSidebarOpen, toggleSidebar, navItems }) {
                                 onClick={() => { if (toggleSidebar) toggleSidebar(); }}
                                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors group relative ${isActive
                                     ? 'bg-jual-green/10 text-jual-green font-medium'
-                                    : 'text-jual-text-muted hover:bg-jual-card hover:text-white'
+                                    : 'text-jual-text-muted hover:bg-jual-card hover:text-jual-text-main'
                                     }`}
                             >
-                                <item.icon className={`w-5 h-5 ${isActive ? 'text-jual-green' : 'text-jual-text-muted group-hover:text-white'}`} />
+                                <item.icon className={`w-5 h-5 ${isActive ? 'text-jual-green' : 'text-jual-text-muted group-hover:text-jual-text-main'}`} />
                                 {item.name}
                                 {isActive && (
                                     <div className="absolute left-0 w-1 h-8 bg-jual-green rounded-r-full"></div>
@@ -75,7 +77,7 @@ export default function Sidebar({ isSidebarOpen, toggleSidebar, navItems }) {
                 <div className="p-4 border-t border-jual-border flex flex-col gap-1">
                     <button 
                         onClick={() => setShowDevModal(true)}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-jual-text-muted hover:bg-jual-card hover:text-white transition-colors text-left"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-jual-text-muted hover:bg-jual-card hover:text-jual-text-main transition-colors text-left"
                     >
                         <HelpCircle className="w-5 h-5" />
                         Help Center
@@ -84,10 +86,10 @@ export default function Sidebar({ isSidebarOpen, toggleSidebar, navItems }) {
                         href={route('logout')}
                         method="post"
                         as="button"
-                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-jual-text-muted hover:bg-red-500/10 hover:text-red-400 transition-colors cursor-pointer"
+                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-jual-text-muted hover:bg-red-500/10 hover:text-red-400 transition-colors cursor-pointer text-left"
                     >
                         <LogOut className="w-5 h-5" />
-                        Logout
+                        {t('logout')}
                     </Link>
                 </div>
             </aside>

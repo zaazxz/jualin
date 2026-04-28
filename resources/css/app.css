@@ -1,24 +1,56 @@
 @import "tailwindcss";
 
+@layer base {
+  :root {
+    --bg-main: #f8fafc; /* Softer slate background */
+    --bg-card: #ffffff;
+    --bg-card-hover: #f1f5f9;
+    --bg-input: #ffffff;
+    --bg-alt: #f1f5f9;
+    --border-main: #e2e8f0;
+    --text-main: #0f172a;
+    --text-muted: #475569;
+    --brand-green: #059669; /* Slightly darker green for better contrast on white */
+    --brand-green-hover: #047857;
+    --grid-opacity: 0.08;
+  }
+  
+  .dark {
+    --bg-main: #0A0F1C;
+    --bg-card: #131B2F;
+    --bg-card-hover: #1A243A;
+    --bg-input: #131d23;
+    --bg-alt: #0a0f12;
+    --border-main: #1E293B;
+    --text-main: #F8FAFC;
+    --text-muted: #94A3B8;
+    --brand-green: #00b57a;
+    --brand-green-hover: #009a68;
+    --grid-opacity: 0.05;
+  }
+}
+
 @theme {
     /* Base colors */
-    --color-jual-bg: #0A0F1C;
-    --color-jual-card: #131B2F;
-    --color-jual-card-hover: #1A243A;
-    --color-jual-border: #1E293B;
+    --color-jual-bg: var(--bg-main);
+    --color-jual-card: var(--bg-card);
+    --color-jual-card-hover: var(--bg-card-hover);
+    --color-jual-input: var(--bg-input);
+    --color-jual-bg-alt: var(--bg-alt);
+    --color-jual-border: var(--border-main);
     
     /* Brand Accent */
-    --color-jual-green: #00B57A;
-    --color-jual-green-hover: #009A68;
+    --color-jual-green: var(--brand-green);
+    --color-jual-green-hover: var(--brand-green-hover);
     
     /* Text */
-    --color-jual-text-main: #F8FAFC;
-    --color-jual-text-muted: #94A3B8;
+    --color-jual-text-main: var(--text-main);
+    --color-jual-text-muted: var(--text-muted);
 }
 
 @layer utilities {
     .bg-grid-pattern {
-        background-image: radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+        background-image: radial-gradient(circle at 2px 2px, rgba(148, 163, 184, var(--grid-opacity)) 1px, transparent 0);
         background-size: 32px 32px;
     }
 }
