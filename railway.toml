@@ -6,3 +6,5 @@ healthcheckPath = "/up"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
+# Kita pastikan migrasi jalan dan folder storage siap
+startCommand = "php artisan migrate --force --seed && /start-container.sh"
