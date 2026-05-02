@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Head, usePage, useForm } from '@inertiajs/react';
-import { Settings as SettingsIcon, User, Lock, Bell, Palette, Shield, ChevronRight, Save, Loader2, CheckCircle } from 'lucide-react';
+import { Settings as SettingsIcon, User, Lock, Bell, Palette, Shield, ChevronRight, Save, Loader2, CheckCircle, Sun, Moon, Camera, Upload } from 'lucide-react';
 import Layout from '@/Layouts/Dashboard/Layout';
 import { useAppStore } from '@/store/useAppStore';
 
@@ -10,9 +10,13 @@ export default function Settings() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const { t } = useAppStore();
 
-    const { data, setData, patch, processing, errors, recentlySuccessful } = useForm({
+    const [avatarPreview, setAvatarPreview] = useState(auth.user.avatar ? (auth.user.avatar.startsWith('http') ? auth.user.avatar : `/storage/${auth.user.avatar}`) : null);
+
+    const { data, setData, post, processing, errors, recentlySuccessful } = useForm({
         name: auth.user.name,
         email: auth.user.email,
+        avatar: null,
+        _method: 'patch',
     });
 
     const {
@@ -25,16 +29,42 @@ export default function Settings() {
         password: '',
     });
 
+    const {
+        data: passwordData,
+        setData: setPasswordData,
+        put: updatePassword,
+        processing: passwordProcessing,
+        errors: passwordErrors,
+        reset: resetPassword,
+        recentlySuccessful: passwordRecentlySuccessful
+    } = useForm({
+        current_password: '',
+        password: '',
+        password_confirmation: '',
+    });
+
+    const { theme, toggleTheme } = useAppStore();
+
     const sections = [
         { id: 'profile', label: t('my_profile'), icon: User, desc: t('my_profile_desc') },
         { id: 'security', label: t('security'), icon: Lock, desc: t('security_desc') },
-        { id: 'notifications', label: t('notifications'), icon: Bell, desc: t('notifications_desc') },
+        // { id: 'notifications', label: t('notifications'), icon: Bell, desc: t('notifications_desc') },
         { id: 'appearance', label: t('appearance'), icon: Palette, desc: t('appearance_desc') },
     ];
 
     const handleUpdateProfile = (e) => {
         e.preventDefault();
-        patch(route('profile.update'));
+        post(route('profile.update'), {
+            preserveScroll: true,
+        });
+    };
+
+    const handleAvatarChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setData('avatar', file);
+            setAvatarPreview(URL.createObjectURL(file));
+        }
     };
 
     const handleDeleteAccount = (e) => {
@@ -44,6 +74,18 @@ export default function Settings() {
             onSuccess: () => setShowDeleteModal(false),
             onError: () => document.getElementById('password_input').focus(),
             onFinish: () => resetDelete(),
+        });
+    };
+
+    const handleUpdatePassword = (e) => {
+        e.preventDefault();
+        updatePassword(route('password.update'), {
+            preserveScroll: true,
+            onSuccess: () => resetPassword(),
+            onError: (err) => {
+                if (err.password) resetPassword('password', 'password_confirmation');
+                if (err.current_password) resetPassword('current_password');
+            },
         });
     };
 
@@ -67,8 +109,8 @@ export default function Settings() {
                                 key={s.id}
                                 onClick={() => setActiveSection(s.id)}
                                 className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 text-left border ${activeSection === s.id
-                                        ? 'bg-emerald-500/5 border-emerald-500/20 ring-1 ring-emerald-500/10'
-                                        : 'hover:bg-jual-card border-transparent hover:border-jual-border group'
+                                    ? 'bg-emerald-500/5 border-emerald-500/20 ring-1 ring-emerald-500/10'
+                                    : 'hover:bg-jual-card border-transparent hover:border-jual-border group'
                                     }`}
                             >
                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${activeSection === s.id ? 'bg-emerald-500 text-slate-900' : 'bg-jual-input text-jual-text-muted group-hover:text-emerald-400'
@@ -101,6 +143,41 @@ export default function Settings() {
                                     </h2>
 
                                     <div className="space-y-8 relative z-10">
+                                        {/* Avatar Upload */}
+                                        <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-jual-border/50">
+                                            <div className="relative group/avatar">
+                                                <div className="w-24 h-24 rounded-2xl bg-jual-input border-2 border-jual-border overflow-hidden flex items-center justify-center group-hover/avatar:border-emerald-500/50 transition-all duration-300 shadow-xl">
+                                                    {avatarPreview ? (
+                                                        <img 
+                                                            src={avatarPreview} 
+                                                            alt="Avatar" 
+                                                            className="w-full h-full object-cover" 
+                                                            onError={(e) => {
+                                                                e.target.onerror = null; 
+                                                                e.target.src = null; // or a fallback image
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <User className="w-10 h-10 text-jual-text-muted" />
+                                                    )}
+                                                </div>
+                                                <label className="absolute -bottom-2 -right-2 w-8 h-8 bg-emerald-500 hover:bg-emerald-400 text-slate-900 rounded-lg flex items-center justify-center cursor-pointer shadow-lg transition-all hover:scale-110 active:scale-95 border-2 border-jual-card">
+                                                    <Camera className="w-4 h-4" />
+                                                    <input 
+                                                        type="file" 
+                                                        className="hidden" 
+                                                        accept="image/*"
+                                                        onChange={handleAvatarChange}
+                                                    />
+                                                </label>
+                                            </div>
+                                            <div className="text-center sm:text-left">
+                                                <h3 className="text-sm font-bold text-jual-text-main">{t('profile_photo')}</h3>
+                                                <p className="text-[10px] text-jual-text-muted mt-1">{t('profile_photo_desc')}</p>
+                                                {errors.avatar && <p className="text-[10px] text-red-500 mt-2 font-bold">{errors.avatar}</p>}
+                                            </div>
+                                        </div>
+
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                             <div className="space-y-2">
                                                 <label className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest ml-1">{t('full_name')}</label>
@@ -153,6 +230,126 @@ export default function Settings() {
                                     </div>
                                 </div>
                             </>
+                        ) : activeSection === 'security' ? (
+                            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+                                <form onSubmit={handleUpdatePassword} className="bg-jual-card border border-jual-border rounded-3xl p-8 relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
+
+                                    <h2 className="text-xl font-bold text-jual-text-main mb-8 pb-4 border-b border-jual-border flex items-center justify-between">
+                                        {t('update_password')}
+                                        {passwordRecentlySuccessful && (
+                                            <span className="bg-emerald-500/10 text-emerald-500 text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                <CheckCircle className="w-3 h-3" /> {t('saved')}
+                                            </span>
+                                        )}
+                                    </h2>
+
+                                    <div className="space-y-6 relative z-10">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest ml-1">{t('current_password')}</label>
+                                            <input
+                                                type="password"
+                                                value={passwordData.current_password}
+                                                onChange={e => setPasswordData('current_password', e.target.value)}
+                                                className="w-full bg-jual-input border border-jual-border rounded-xl px-4 py-3 text-sm text-jual-text-main focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300"
+                                                placeholder="••••••••"
+                                            />
+                                            {passwordErrors.current_password && <p className="text-xs text-red-500 mt-1">{passwordErrors.current_password}</p>}
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest ml-1">{t('new_password')}</label>
+                                                <input
+                                                    type="password"
+                                                    value={passwordData.password}
+                                                    onChange={e => setPasswordData('password', e.target.value)}
+                                                    className="w-full bg-jual-input border border-jual-border rounded-xl px-4 py-3 text-sm text-jual-text-main focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300"
+                                                    placeholder="••••••••"
+                                                />
+                                                {passwordErrors.password && <p className="text-xs text-red-500 mt-1">{passwordErrors.password}</p>}
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest ml-1">{t('confirm_password')}</label>
+                                                <input
+                                                    type="password"
+                                                    value={passwordData.password_confirmation}
+                                                    onChange={e => setPasswordData('password_confirmation', e.target.value)}
+                                                    className="w-full bg-jual-input border border-jual-border rounded-xl px-4 py-3 text-sm text-jual-text-main focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300"
+                                                    placeholder="••••••••"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="pt-6 border-t border-jual-border flex justify-end">
+                                            <button
+                                                type="submit"
+                                                disabled={passwordProcessing}
+                                                className="bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-900 font-bold px-8 py-3 rounded-xl text-sm flex items-center gap-2 transition-all shadow-[0_4px_15px_rgba(16,185,129,0.2)]"
+                                            >
+                                                {passwordProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                                                {t('update_password')}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+
+                                {/* 2FA Placeholder */}
+                                <div className="bg-jual-card border border-jual-border rounded-3xl p-8 opacity-60">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center border border-amber-500/20">
+                                                <Shield className="w-5 h-5 text-amber-500" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-sm font-bold text-jual-text-main">{t('two_factor_auth')}</h3>
+                                                <p className="text-[10px] text-jual-text-muted">{t('two_factor_auth_desc')}</p>
+                                            </div>
+                                        </div>
+                                        <div className="bg-jual-bg border border-jual-border px-3 py-1 rounded-full text-[10px] font-bold text-jual-text-muted uppercase tracking-widest">
+                                            {t('coming_soon')}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : activeSection === 'appearance' ? (
+                            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+                                <div className="bg-jual-card border border-jual-border rounded-3xl p-8 relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
+
+                                    <h2 className="text-xl font-bold text-jual-text-main mb-8 pb-4 border-b border-jual-border">
+                                        {t('theme_settings')}
+                                    </h2>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
+                                        <button
+                                            onClick={() => theme !== 'light' && toggleTheme()}
+                                            className={`p-6 rounded-2xl border transition-all duration-300 text-left flex items-center gap-4 ${theme === 'light' ? 'bg-emerald-500/5 border-emerald-500/30 ring-1 ring-emerald-500/20' : 'bg-jual-input border-jual-border hover:border-emerald-500/30'}`}
+                                        >
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${theme === 'light' ? 'bg-emerald-500 text-white' : 'bg-jual-bg text-jual-text-muted'}`}>
+                                                <Sun className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-bold text-jual-text-main">{t('light_mode')}</p>
+                                                <p className="text-[10px] text-jual-text-muted">{t('light_mode_desc')}</p>
+                                            </div>
+                                        </button>
+
+                                        <button
+                                            onClick={() => theme !== 'dark' && toggleTheme()}
+                                            className={`p-6 rounded-2xl border transition-all duration-300 text-left flex items-center gap-4 ${theme === 'dark' ? 'bg-emerald-500/5 border-emerald-500/30 ring-1 ring-emerald-500/20' : 'bg-jual-input border-jual-border hover:border-emerald-500/30'}`}
+                                        >
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${theme === 'dark' ? 'bg-emerald-500 text-white' : 'bg-jual-bg text-jual-text-muted'}`}>
+                                                <Moon className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-bold text-jual-text-main">{t('dark_mode')}</p>
+                                                <p className="text-[10px] text-jual-text-muted">{t('dark_mode_desc')}</p>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         ) : (
                             <div className="bg-jual-card border border-jual-border border-dashed rounded-3xl p-12 text-center animate-in fade-in duration-500">
                                 <SettingsIcon className="w-12 h-12 text-jual-text-muted mx-auto mb-4 animate-spin-slow" />

@@ -77,7 +77,7 @@ export default function Topbar({ toggleSidebar }) {
                         {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                     </button>
 
-                    {/* Notifications */}
+                    {/* Notifications (Hidden as per request)
                     <button
                         onClick={() => setShowDevModal(true)}
                         className="text-jual-text-muted hover:text-emerald-400 transition-colors relative p-2 hover:bg-jual-card rounded-lg"
@@ -85,6 +85,7 @@ export default function Topbar({ toggleSidebar }) {
                         <Bell className="w-5 h-5" />
                         <span className="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full border-2 border-[#0a0f0d]"></span>
                     </button>
+                    */}
 
                     {/* User Profile Dropdown */}
                     <div className="relative">
@@ -93,7 +94,15 @@ export default function Topbar({ toggleSidebar }) {
                             className="flex items-center gap-3 pl-2 pr-1 py-1 rounded-xl hover:bg-jual-card border border-transparent hover:border-jual-border transition-all duration-300 group"
                         >
                             <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center overflow-hidden group-hover:border-emerald-500/40 transition-colors">
-                                <User className="w-5 h-5 text-emerald-500" />
+                                {auth.user.avatar ? (
+                                    <img 
+                                        src={auth.user.avatar.startsWith('http') ? auth.user.avatar : `/storage/${auth.user.avatar}`} 
+                                        alt={auth.user.name} 
+                                        className="w-full h-full object-cover" 
+                                    />
+                                ) : (
+                                    <User className="w-5 h-5 text-emerald-500" />
+                                )}
                             </div>
                             <div className="hidden md:block text-left mr-1">
                                 <p className="text-xs font-bold text-jual-text-main leading-none">{auth.user.name}</p>
