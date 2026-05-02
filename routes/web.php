@@ -27,10 +27,6 @@ Route::get('/', function () {
     return Inertia::render('Welcome');
 });
     
-Route::get('/register', function () {
-    return Inertia::render('Auth/Register');
-})->name('register');
-
 Route::get('/terms', function () {
     return Inertia::render('Legal/Terms');
 })->name('terms');
@@ -41,9 +37,8 @@ Route::get('/privacy', function () {
 
 Route::get('/p/{slug}', [SalesController::class, 'show'])->name('sales.preview');
 
-
 // Authenticated only
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     
     Route::get('/dashboard', [SalesController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/projects', [SalesController::class, 'projects'])->name('dashboard.projects');
