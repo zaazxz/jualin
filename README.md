@@ -25,10 +25,13 @@
 - 🎨 **Multiple Design Templates** — Choose from curated themes (Minimalist, Bold, Dark, Playful, etc.)
 - 🌐 **Multilingual UI** — Full support for Indonesian (ID), English (EN), and Malay (MS)
 - 🌙 **Light / Dark Mode** — System-aware theme with instant toggle
+- 🔑 **Google OAuth Integration** — Seamless login and registration using Google accounts
+- 👤 **Profile Management** — Personalize your account with custom profile pictures (manual upload or auto-fetch from Google)
+- 🔐 **Advanced Security** — Update password, manage account settings, and 2FA-ready UI
 - 📥 **One-Click HTML Export** — Download your sales page as a standalone HTML file
 - 👁️ **Live Preview** — Browser-mockup preview before saving or downloading
 - 📁 **Project Management** — Save, edit, regenerate, and manage all your sales pages
-- 🔐 **Authentication** — Secure login, registration, email verification, and password reset
+- 📧 **Email Verification** — Secure account validation system
 
 ---
 
@@ -42,6 +45,7 @@
 | **Laravel Breeze** | ^1.29 | Authentication scaffolding (login, register, verify, reset) |
 | **Laravel Sanctum** | ^3.2 | API token & session authentication |
 | **Inertia.js (Server)** | ^2.0 | Adapter connecting Laravel to React without a separate API |
+| **Laravel Socialite** | ^5.16 | OAuth authentication for Google Login |
 | **Tighten Ziggy** | ^2.0 | Exposes Laravel named routes to the frontend |
 | **Guzzle HTTP** | ^7.2 | HTTP client used to call the Gemini AI API |
 
@@ -139,6 +143,9 @@ Copy `.env.example` to `.env` and configure the following key variables:
 | `DB_*` | Database connection details |
 | `MAIL_*` | SMTP credentials for sending emails |
 | `GEMINI_API_KEY` | Your Google Gemini API key — **required for AI generation** |
+| `GOOGLE_CLIENT_ID` | Your Google Cloud Client ID for OAuth |
+| `GOOGLE_CLIENT_SECRET` | Your Google Cloud Client Secret for OAuth |
+| `GOOGLE_REDIRECT_URI` | `http://127.0.0.1:8000/auth/google/callback` |
 
 > ⚠️ Never commit your real `.env` file to version control. Only commit `.env.example`.
 
