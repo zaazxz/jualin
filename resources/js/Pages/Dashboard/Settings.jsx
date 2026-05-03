@@ -1,14 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head, usePage, useForm } from '@inertiajs/react';
-import { Settings as SettingsIcon, User, Lock, Bell, Palette, Shield, ChevronRight, Save, Loader2, CheckCircle, Sun, Moon, Camera, Upload } from 'lucide-react';
+import { Settings as SettingsIcon, User, Lock, Bell, Palette, Shield, ChevronRight, Save, Loader2, CheckCircle, Sun, Moon, Camera, Upload, AlertCircle, Clock, Sparkles, RefreshCw } from 'lucide-react';
 import Layout from '@/Layouts/Dashboard/Layout';
 import { useAppStore } from '@/store/useAppStore';
 
-export default function Settings() {
+export default function Settings({ salesCount = 0 }) {
     const { auth } = usePage().props;
     const [activeSection, setActiveSection] = useState('profile');
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const { t } = useAppStore();
+
+    const [apiStatus, setApiStatus] = useState({ loading: false, status: 'unknown', message: 'Not checked', details: '' });
+
+    const checkApiStatus = async () => {
+        setApiStatus(prev => ({ ...prev, loading: true }));
+        try {
+            const response = await window.axios.get(route('api.check-status'));
+            setApiStatus({
+                loading: false,
+                status: response.data.status,
+                message: response.data.message,
+                details: response.data.details
+            });
+        } catch (error) {
+            setApiStatus({
+                loading: false,
+                status: 'error',
+                message: 'Check failed',
+                details: error.message
+            });
+        }
+    };
+
+    useEffect(() => {
+        if (activeSection === 'billing' && apiStatus.status === 'unknown') {
+            checkApiStatus();
+        }
+    }, [activeSection]);
+
+    const MAX_FREE_PAGES = 5;
+    const usagePercentage = (salesCount / MAX_FREE_PAGES) * 100;
 
     const [avatarPreview, setAvatarPreview] = useState(auth.user.avatar ? (auth.user.avatar.startsWith('http') ? auth.user.avatar : `/storage/${auth.user.avatar}`) : null);
 
@@ -47,8 +78,8 @@ export default function Settings() {
 
     const sections = [
         { id: 'profile', label: t('my_profile'), icon: User, desc: t('my_profile_desc') },
+        { id: 'billing', label: 'Subscription & Usage', icon: Shield, desc: 'Manage your AI credits and limits' },
         { id: 'security', label: t('security'), icon: Lock, desc: t('security_desc') },
-        // { id: 'notifications', label: t('notifications'), icon: Bell, desc: t('notifications_desc') },
         { id: 'appearance', label: t('appearance'), icon: Palette, desc: t('appearance_desc') },
     ];
 
@@ -230,6 +261,105 @@ export default function Settings() {
                                     </div>
                                 </div>
                             </>
+                        ) : activeSection === 'billing' ? (
+                            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+                                <div className="bg-jual-card border border-jual-border rounded-3xl p-8 relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
+                                    
+                                    <h2 className="text-xl font-bold text-jual-text-main mb-8 pb-4 border-b border-jual-border flex items-center justify-between">
+                                        Subscription & Usage
+                                        <span className="bg-emerald-500/10 text-emerald-500 text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-widest">
+                                            Free Plan
+                                        </span>
+                                    </h2>
+
+                                    <div className="space-y-10 relative z-10">
+                                        <div className="p-6 bg-jual-input border border-jual-border rounded-2xl">
+                                            <div className="flex justify-between items-end mb-4">
+                                                <div>
+                                                    <h3 className="text-sm font-bold text-jual-text-main">AI Page Generation</h3>
+                                                    <p className="text-[10px] text-jual-text-muted">Total pages created with AI</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <span className="text-lg font-black text-jual-text-main">{salesCount}</span>
+                                                    <span className="text-xs text-jual-text-muted ml-1">/ {MAX_FREE_PAGES} Pages</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="h-3 bg-jual-bg rounded-full overflow-hidden border border-jual-border p-0.5">
+                                                <div 
+                                                    className={`h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(16,185,129,0.2)] ${
+                                                        usagePercentage >= 90 ? 'bg-red-500 shadow-red-500/20' : 
+                                                        usagePercentage >= 70 ? 'bg-amber-500 shadow-amber-500/20' : 'bg-emerald-500'
+                                                    }`}
+                                                    style={{ width: `${Math.min(usagePercentage, 100)}%` }}
+                                                ></div>
+                                            </div>
+                                            
+                                            <div className="mt-4 flex items-center gap-2 text-[10px] text-jual-text-muted">
+                                                <AlertCircle className="w-3 h-3 text-amber-500" />
+                                                <span>Anda dapat menghapus proyek lama untuk mengosongkan kuota AI Anda.</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                            <div className="p-5 border border-jual-border rounded-2xl bg-jual-bg-alt/50">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <p className="text-[10px] font-bold text-jual-text-muted uppercase tracking-widest">Gemini API Health</p>
+                                                    <button 
+                                                        onClick={checkApiStatus}
+                                                        disabled={apiStatus.loading}
+                                                        className="text-emerald-500 hover:text-emerald-400 disabled:opacity-50 transition-all"
+                                                    >
+                                                        <RefreshCw className={`w-3 h-3 ${apiStatus.loading ? 'animate-spin' : ''}`} />
+                                                    </button>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <div className={`w-2 h-2 rounded-full ${
+                                                        apiStatus.status === 'active' ? 'bg-emerald-500 animate-pulse' : 
+                                                        apiStatus.status === 'limit_reached' ? 'bg-amber-500' :
+                                                        apiStatus.status === 'error' || apiStatus.status === 'invalid' ? 'bg-red-500' : 'bg-slate-500'
+                                                    }`}></div>
+                                                    <span className={`text-sm font-bold ${
+                                                        apiStatus.status === 'active' ? 'text-emerald-500' : 
+                                                        apiStatus.status === 'limit_reached' ? 'text-amber-500' :
+                                                        apiStatus.status === 'error' || apiStatus.status === 'invalid' ? 'text-red-500' : 'text-jual-text-muted'
+                                                    }`}>
+                                                        {apiStatus.loading ? 'Checking...' : apiStatus.message}
+                                                    </span>
+                                                </div>
+                                                {apiStatus.details && (
+                                                    <p className="text-[9px] text-jual-text-muted mt-2 leading-tight">
+                                                        {apiStatus.details}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <div className="p-5 border border-jual-border rounded-2xl bg-jual-bg-alt/50">
+                                                <p className="text-[10px] font-bold text-jual-text-muted uppercase tracking-widest mb-1">Model Info</p>
+                                                <div className="flex items-center gap-2 text-sm font-bold text-jual-text-main">
+                                                    <Sparkles className="w-4 h-4 text-emerald-500" />
+                                                    <span>Gemini 1.5 Flash</span>
+                                                </div>
+                                                <p className="text-[9px] text-jual-text-muted mt-2 leading-tight">
+                                                    Gratis 15 RPM / 1M TPM / 1.5K RPD
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-6 bg-gradient-to-br from-emerald-500/10 to-transparent border border-emerald-500/20 rounded-2xl">
+                                            <h4 className="text-sm font-bold text-emerald-500 mb-2 flex items-center gap-2">
+                                                <Sparkles className="w-4 h-4" /> Butuh Lebih Banyak Kuota?
+                                            </h4>
+                                            <p className="text-xs text-jual-text-muted leading-relaxed mb-4">
+                                                Paket gratis terbatas pada 5 halaman. Hubungi admin untuk meningkatkan kapasitas atau integrasi kustom lainnya.
+                                            </p>
+                                            <button className="bg-emerald-500 text-slate-900 text-xs font-black px-6 py-2 rounded-lg hover:bg-emerald-400 transition-all">
+                                                UPGRADE NOW
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         ) : activeSection === 'security' ? (
                             <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
                                 <form onSubmit={handleUpdatePassword} className="bg-jual-card border border-jual-border rounded-3xl p-8 relative overflow-hidden">

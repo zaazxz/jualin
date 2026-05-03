@@ -28,7 +28,6 @@ export default function Layout({ children }) {
         { name: t('dashboard'), href: route('dashboard'), icon: LayoutDashboard },
         { name: t('ai_generator'), href: route('dashboard.ai-generator'), icon: Sparkles },
         { name: t('my_projects'), href: route('dashboard.projects'), icon: FolderOpen },
-        { name: t('analytics'), href: route('dashboard.analytics'), icon: BarChart3 },
         { name: t('settings'), href: route('profile.edit'), icon: Settings },
     ];
 

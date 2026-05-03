@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head, useForm, router, Link } from '@inertiajs/react';
 import { Sparkles, Wand2, MessageSquare, Globe, Zap, Target, PenTool, Loader2, LayoutTemplate, Eye, ExternalLink, CheckCircle2, Palette, ArrowRight, ArrowLeft, Download, Star, AlertCircle } from 'lucide-react';
 import Layout from '@/Layouts/Dashboard/Layout';
 import axios from 'axios';
 import { useAppStore } from '@/store/useAppStore';
+import DOMPurify from 'dompurify';
 
 export default function AiGenerator({ edit_sales, sales_count = 0 }) {
     const { t, language } = useAppStore();
@@ -14,6 +15,7 @@ export default function AiGenerator({ edit_sales, sales_count = 0 }) {
     const [previewContent, setPreviewContent] = useState(null);
     const [templateOptions, setTemplateOptions] = useState([]);
     const [selectedTemplate, setSelectedTemplate] = useState(null);
+    const [alertMessage, setAlertMessage] = useState(null);
 
     const MAX_GENERATION = 5;
     const isLimitReached = !edit_sales && sales_count >= MAX_GENERATION;
@@ -48,16 +50,56 @@ export default function AiGenerator({ edit_sales, sales_count = 0 }) {
         return timer;
     };
 
+    const cleanText = (text) => {
+        if (!text || typeof text !== 'string') return text || '';
+        return text.replace(/\n\nSaran AI untuk Perbaikan:[\s\S]*$/, '').replace(/\[Saran AI\]:.*$/gm, '').trim();
+    };
+
     const { data, setData, reset, processing } = useForm({
         product_name: edit_sales?.product_name || '',
-        description: edit_sales?.product_info?.description || '',
-        audience: edit_sales?.product_info?.audience || '',
-        tone: edit_sales?.product_info?.tone || t('tone_pro'),
+        description: cleanText(edit_sales?.product_info?.description),
+        audience: cleanText(edit_sales?.product_info?.audience),
+        tone: cleanText(edit_sales?.product_info?.tone) || t('tone_pro'),
         web_name: edit_sales?.product_info?.web_name || '',
         brand_color: edit_sales?.product_info?.brand_color || '#10b981',
-        features: edit_sales?.product_info?.features || '',
-        price: edit_sales?.product_info?.price || '',
+        features: cleanText(edit_sales?.product_info?.features),
+        price: cleanText(edit_sales?.product_info?.price),
     });
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('apply_suggestions') === 'true' && edit_sales?.generated_content?.analysis) {
+                const improved = edit_sales.generated_content.analysis.improved_inputs;
+                
+                if (improved) {
+                    const newData = { ...data };
+                    let changed = false;
+                    
+                    const updateField = (field, text) => {
+                        if (text && text !== newData[field]) {
+                            newData[field] = text;
+                            changed = true;
+                        }
+                    };
+
+                    updateField('description', improved.description);
+                    updateField('features', improved.features);
+                    updateField('price', improved.price);
+                    updateField('audience', improved.audience);
+                    updateField('tone', improved.tone);
+
+                    if (changed) {
+                        setData(newData);
+                    }
+                } else if (edit_sales.generated_content.analysis.suggestions) {
+                    // Fallback for legacy projects
+                    setAlertMessage("Proyek ini adalah versi lama. Untuk menggunakan fitur Penulisan Ulang Otomatis, silakan klik 'Generate' satu kali terlebih dahulu untuk memperbarui data AI-nya.");
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            }
+        }
+    }, [edit_sales]);
 
     const handleStartGeneration = async (e) => {
         if (e) e.preventDefault();
@@ -66,6 +108,7 @@ export default function AiGenerator({ edit_sales, sales_count = 0 }) {
 
         try {
             const response = await axios.post(route('sales.generate'), {
+                sales_id: edit_sales?.id,
                 product_name: data.product_name,
                 description: data.description,
                 audience: data.audience,
@@ -75,7 +118,7 @@ export default function AiGenerator({ edit_sales, sales_count = 0 }) {
                 features: data.features,
                 price: data.price,
                 language: language
-            });
+            }, { timeout: 60000 });
 
             const result = response.data;
             setPreviewContent(result);
@@ -140,6 +183,27 @@ export default function AiGenerator({ edit_sales, sales_count = 0 }) {
     ];
 
     const currentStepIndex = steps.findIndex(s => s.id === step);
+
+    const createPreviewIframeHtml = () => {
+        if (!previewContent?.html_content) return '';
+        const cleanHtml = DOMPurify.sanitize(previewContent.html_content);
+        return `<!DOCTYPE html>
+<html lang="${language || 'id'}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+    </style>
+</head>
+<body style="background-color: ${selectedTemplate?.bg_color || '#ffffff'}; color: ${selectedTemplate?.text_color || '#1e293b'}; margin: 0; padding: 0; transition: all 0.5s;">
+    ${cleanHtml}
+</body>
+</html>`;
+    };
 
     return (
         <Layout>
@@ -333,23 +397,15 @@ export default function AiGenerator({ edit_sales, sales_count = 0 }) {
                                         type="submit"
                                         onClick={handleStartGeneration}
                                         disabled={isGenerating || isLimitReached}
-                                        className={`flex-1 flex items-center justify-center gap-2 font-bold px-6 py-4 rounded-xl transition-all ${
+                                        className={`flex items-center justify-center gap-2 font-bold px-8 py-3 rounded-xl transition-all ${
                                             isLimitReached ? 'bg-jual-border text-jual-text-muted cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900 shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.4)]'
                                         }`}
                                     >
                                         {isGenerating ? (
-                                            <div className="w-full px-6 flex flex-col items-center gap-1">
-                                                <div className="w-full flex justify-between items-center text-emerald-500 text-[9px] font-black uppercase tracking-tighter">
-                                                    <span className="truncate">{progressText}</span>
-                                                    <span>{Math.round(progress)}%</span>
-                                                </div>
-                                                <div className="w-full h-1 bg-jual-border/30 rounded-full overflow-hidden">
-                                                    <div
-                                                        className="h-full bg-emerald-500 transition-all duration-300 ease-out"
-                                                        style={{ width: `${progress}%` }}
-                                                    ></div>
-                                                </div>
-                                            </div>
+                                            <>
+                                                <Loader2 className="w-5 h-5 animate-spin" />
+                                                <span>{progressText} ({Math.round(progress)}%)</span>
+                                            </>
                                         ) : (
                                             <>{edit_sales ? 'Simpan & Generate Ulang' : isLimitReached ? 'Limit Habis' : t('generate_now')} {!isLimitReached && <Sparkles className="w-4 h-4" />}</>
                                         )}
@@ -414,55 +470,94 @@ export default function AiGenerator({ edit_sales, sales_count = 0 }) {
                             </div>
                         </div>
 
-                        {previewContent?.analysis && (
-                            <div className="bg-jual-card border border-jual-border rounded-2xl p-6 shadow-sm flex flex-col md:flex-row gap-6 items-start mt-6">
-                                <div className="flex flex-col items-center justify-center min-w-[140px] bg-jual-input p-4 rounded-xl border border-jual-border">
-                                    <div className="text-amber-500 font-bold mb-1 flex items-center gap-1.5 text-xs"><Star className="w-4 h-4 fill-amber-500" /> Skor AI</div>
-                                    <div className="text-4xl font-black text-jual-text-main">{previewContent.analysis.score}<span className="text-sm text-jual-text-muted">/100</span></div>
-                                </div>
-                                <div className="flex-1 space-y-3">
-                                    <h3 className="font-bold text-sm text-jual-text-main flex items-center gap-2"><Sparkles className="w-4 h-4 text-emerald-500" /> Saran Peningkatan</h3>
-                                    <ul className="space-y-2">
-                                        {previewContent.analysis.suggestions.map((sug, idx) => (
-                                            <li key={idx} className="text-sm text-jual-text-muted flex items-start gap-2">
-                                                <span className="text-emerald-500 mt-0.5 font-bold">•</span> <span>{sug}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Browser Window Mockup */}
-                        <div className="rounded-3xl overflow-hidden border-[8px] sm:border-[12px] border-jual-card shadow-2xl relative transition-colors duration-500" style={{ backgroundColor: selectedTemplate?.bg_color || '#ffffff' }}>
-                            <div className="bg-jual-bg px-6 py-3 flex items-center justify-between border-b border-jual-border">
-                                <div className="flex gap-1.5">
-                                    <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                                    <div className="w-3 h-3 rounded-full bg-amber-400"></div>
-                                    <div className="w-3 h-3 rounded-full bg-emerald-400"></div>
-                                </div>
-                                <div className="bg-jual-input px-4 py-1.5 rounded-lg text-[10px] text-jual-text-muted font-bold w-64 truncate text-center border border-jual-border">
-                                    {data.product_name.toLowerCase().replace(/ /g, '-')}.html
-                                </div>
-                                <div className="w-10"></div>
-                            </div>
-
-                            <div 
-                                className="h-[700px] overflow-y-auto scrollbar-thin transition-colors duration-500"
-                                style={{ color: selectedTemplate?.text_color || '#1e293b' }}
-                            >
-                                {previewContent?.html_content ? (
-                                    <div dangerouslySetInnerHTML={{ __html: previewContent.html_content }} />
-                                ) : (
-                                    <div className="flex items-center justify-center h-full text-jual-text-muted">
-                                        {t('render_failed')}
+                        <div className="flex flex-col lg:flex-row gap-8 items-start mt-6">
+                            {/* Browser Window Mockup */}
+                            <div className="flex-1 w-full rounded-3xl overflow-hidden border-[8px] sm:border-[12px] border-jual-card shadow-2xl relative transition-colors duration-500" style={{ backgroundColor: selectedTemplate?.bg_color || '#ffffff' }}>
+                                <div className="bg-jual-bg px-3 md:px-6 py-3 flex items-center justify-between border-b border-jual-border">
+                                    <div className="flex gap-1.5">
+                                        <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-red-400"></div>
+                                        <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-amber-400"></div>
+                                        <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-emerald-400"></div>
                                     </div>
-                                )}
+                                    <div className="bg-jual-input px-3 md:px-4 py-1.5 rounded-lg text-[9px] md:text-[10px] text-jual-text-muted font-bold w-32 md:w-64 truncate text-center border border-jual-border flex-shrink-0 mx-2">
+                                        {data.product_name.toLowerCase().replace(/ /g, '-')}.html
+                                    </div>
+                                    <div className="w-6 md:w-10"></div>
+                                </div>
+
+                                <div className="h-[500px] md:h-[700px] bg-white transition-colors duration-500">
+                                    {previewContent?.html_content ? (
+                                        <iframe 
+                                            srcDoc={createPreviewIframeHtml()} 
+                                            className="w-full h-full border-none bg-white"
+                                            sandbox="allow-scripts allow-same-origin"
+                                            title="AI Result Preview"
+                                        />
+                                    ) : (
+                                        <div className="flex items-center justify-center h-full text-jual-text-muted">
+                                            {t('render_failed')}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
+
+                            {/* Analysis Sidebar */}
+                            {previewContent?.analysis && (
+                                <div className="w-full lg:w-[350px] flex-shrink-0 bg-jual-card border border-jual-border rounded-3xl p-6 shadow-xl space-y-6">
+                                    <div className="flex items-center justify-between bg-jual-input p-4 rounded-2xl border border-jual-border">
+                                        <div className="flex items-center gap-2 text-amber-500 font-bold text-sm">
+                                            <Star className="w-5 h-5 fill-amber-500" /> Skor AI
+                                        </div>
+                                        <div className="text-2xl font-black text-jual-text-main">{previewContent.analysis.score}<span className="text-xs text-jual-text-muted">/100</span></div>
+                                    </div>
+                                    
+                                    <div>
+                                        <h3 className="font-bold text-lg text-jual-text-main flex items-center gap-2 mb-4"><Sparkles className="w-5 h-5 text-amber-500" /> Saran Peningkatan AI</h3>
+                                        <div className="space-y-4">
+                                            {previewContent.analysis.suggestions.map((sug, idx) => (
+                                                <div key={idx} className="bg-jual-bg border border-jual-border p-4 rounded-2xl flex items-start gap-3 transition-colors hover:border-emerald-500/30">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div>
+                                                    <p className="text-sm text-jual-text-muted leading-relaxed">{sug}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-emerald-500/5 border border-emerald-500/20 p-5 rounded-2xl mt-6 relative overflow-hidden group">
+                                        <div className="absolute -right-4 -top-4 w-16 h-16 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition-all"></div>
+                                        <h4 className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-2">Status Optimasi</h4>
+                                        <p className="text-xs text-jual-text-muted leading-relaxed">Terapkan saran AI ini pada copywriting dan struktur halaman untuk meningkatkan rasio konversi Anda secara signifikan.</p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
             </div>
+
+            {/* Alert Modal */}
+            {alertMessage && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setAlertMessage(null)}></div>
+                    <div className="bg-jual-bg border border-jual-border rounded-3xl w-full max-w-sm relative z-10 overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+                        <div className="p-6 text-center">
+                            <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center border border-amber-500/20 mb-4 mx-auto">
+                                <AlertCircle className="w-6 h-6 text-amber-500" />
+                            </div>
+                            <h3 className="text-xl font-bold text-jual-text-main mb-2">Pemberitahuan</h3>
+                            <p className="text-sm text-jual-text-muted mb-6 leading-relaxed">
+                                {alertMessage}
+                            </p>
+                            <button
+                                onClick={() => setAlertMessage(null)}
+                                className="w-full py-2.5 bg-jual-input hover:bg-jual-card border border-jual-border rounded-xl text-sm font-bold text-jual-text-main transition-colors"
+                            >
+                                Mengerti
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </Layout>
     );
 }

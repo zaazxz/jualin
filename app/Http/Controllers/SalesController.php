@@ -18,7 +18,7 @@ class SalesController extends Controller
     {
         $sales = Sales::where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(6); // Use pagination for performance
 
         return Inertia::render('Dashboard/Index', [
             'sales' => $sales
@@ -32,7 +32,7 @@ class SalesController extends Controller
     {
         $sales = Sales::where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(12);
 
         return Inertia::render('Dashboard/Projects', [
             'sales' => $sales
@@ -42,11 +42,17 @@ class SalesController extends Controller
     /**
      * Display analytics.
      */
-    public function analytics()
+    public function analytics(Sales $sales = null)
     {
-        $sales = Sales::where('user_id', Auth::id())
-            ->orderBy('created_at', 'desc')
-            ->get();
+        if ($sales && $sales->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if (!$sales) {
+            $sales = Sales::where('user_id', Auth::id())
+                ->orderBy('created_at', 'desc')
+                ->first();
+        }
 
         return Inertia::render('Dashboard/Analytics', [
             'sales' => $sales
@@ -58,6 +64,22 @@ class SalesController extends Controller
      */
     public function generate(Request $request, GeminiService $gemini)
     {
+        // Backend enforcement of limit (Max 5 pages)
+        // Jika sedang edit (ada sales_id), jangan blokir
+        $salesId = $request->input('sales_id');
+        $count = Sales::where('user_id', Auth::id())
+            ->when(!$salesId, function($query) {
+                return $query;
+            })
+            ->when($salesId, function($query) use ($salesId) {
+                return $query->where('id', '!=', $salesId);
+            })
+            ->count();
+
+        if ($count >= 5) {
+            return response()->json(['error' => 'Limit AI tercapai (Maksimal 5 halaman). Hapus salah satu proyek untuk membuat yang baru.'], 403);
+        }
+
         set_time_limit(180); // Berikan waktu lebih untuk AI berkreasi
 
         $validated = $request->validate([
@@ -103,6 +125,11 @@ class SalesController extends Controller
             'template' => 'nullable|string',
         ]);
 
+        // Double check limit before storing new
+        if (Sales::where('user_id', Auth::id())->count() >= 5) {
+            return redirect()->back()->withErrors(['message' => 'Limit tercapai.']);
+        }
+
         $sales = Sales::create([
             'user_id' => Auth::id(),
             'product_name' => $validated['product_name'],
@@ -126,20 +153,42 @@ class SalesController extends Controller
             abort(403);
         }
 
+        // KUNCI: Jika sudah published, hanya boleh ubah STATUS (untuk unpublish). 
+        // Data lain (nama, info, html) tetap terkunci.
+        if ($sales->status === 'published' && !$request->has('status')) {
+            return $request->wantsJson() 
+                ? response()->json(['error' => 'Proyek yang sedang dipublikasikan tidak dapat diubah datanya. Ubah status ke Draft terlebih dahulu.'], 403)
+                : redirect()->back()->withErrors(['message' => 'Proyek yang sedang dipublikasikan tidak dapat diubah datanya. Ubah status ke Draft terlebih dahulu.']);
+        }
+
+        if ($sales->status === 'published' && $request->hasAny(['product_name', 'product_info', 'generated_content', 'template', 'html_content'])) {
+             // Block if trying to change content while published
+             return $request->wantsJson() 
+                ? response()->json(['error' => 'Proyek yang sedang dipublikasikan tidak dapat diubah datanya. Ubah status ke Draft terlebih dahulu.'], 403)
+                : redirect()->back()->withErrors(['message' => 'Proyek yang sedang dipublikasikan tidak dapat diubah datanya. Ubah status ke Draft terlebih dahulu.']);
+        }
+
         $validated = $request->validate([
-            'product_name' => 'required|string|max:255',
-            'product_info' => 'required|array',
+            'product_name' => 'sometimes|required|string|max:255',
+            'product_info' => 'sometimes|required|array',
             'generated_content' => 'nullable|array',
             'template' => 'nullable|string',
+            'status' => 'nullable|string|in:draft,downloaded,published',
         ]);
 
-        $sales->update([
-            'product_name' => $validated['product_name'],
-            'product_info' => $validated['product_info'],
-            'generated_content' => $validated['generated_content'] ?? null,
-            'template' => $validated['template'] ?? 'modern',
-            'html_content' => $request->input('html_content'),
-        ]);
+        $updateData = [];
+        if ($request->has('product_name')) $updateData['product_name'] = $validated['product_name'];
+        if ($request->has('product_info')) $updateData['product_info'] = $validated['product_info'];
+        if ($request->has('generated_content')) $updateData['generated_content'] = $validated['generated_content'];
+        if ($request->has('template')) $updateData['template'] = $validated['template'];
+        if ($request->has('html_content')) $updateData['html_content'] = $request->input('html_content');
+        if ($request->has('status')) $updateData['status'] = $validated['status'];
+
+        $sales->update($updateData);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'sales' => $sales]);
+        }
 
         return redirect()->route('dashboard')->with('success', 'Halaman berhasil diperbarui!');
     }
@@ -163,6 +212,10 @@ class SalesController extends Controller
     {
         if ($sales->user_id !== Auth::id()) {
             abort(403);
+        }
+
+        if ($sales->status === 'published') {
+            return redirect()->back()->withErrors(['message' => 'Proyek yang sudah dipublikasikan tidak dapat dihapus.']);
         }
 
         $sales->delete();
