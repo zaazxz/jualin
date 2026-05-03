@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { FolderOpen, Search, Star, Calendar, ExternalLink, Download, Trash2, ArrowRight, LayoutTemplate, MoreVertical, PenTool, Sparkles } from 'lucide-react';
+import { Head, Link, useForm, router } from '@inertiajs/react';
+import { FolderOpen, Search, Star, Calendar, ExternalLink, Download, Trash2, ArrowRight, LayoutTemplate, MoreVertical, PenTool, Sparkles, ChevronDown } from 'lucide-react';
+import axios from 'axios';
 import Layout from '@/Layouts/Dashboard/Layout';
 import { useAppStore } from '@/store/useAppStore';
 
@@ -16,6 +17,15 @@ export default function Projects({ sales }) {
             destroy(route('sales.destroy', id), {
                 preserveScroll: true,
             });
+        }
+    };
+
+    const updateStatus = async (id, newStatus) => {
+        try {
+            await axios.put(route('sales.update', id), { status: newStatus });
+            router.reload({ only: ['sales'] });
+        } catch (error) {
+            console.error('Failed to update status', error);
         }
     };
 
@@ -112,6 +122,7 @@ export default function Projects({ sales }) {
                                     <th className="px-6 py-4 text-[10px] font-bold text-jual-text-muted uppercase tracking-widest w-[35%]">{t('product_info')}</th>
                                     <th className="px-6 py-4 text-[10px] font-bold text-jual-text-muted uppercase tracking-widest w-[15%]">{t('template')}</th>
                                     <th className="px-6 py-4 text-[10px] font-bold text-jual-text-muted uppercase tracking-widest w-[15%]">{t('ai_score')}</th>
+                                    <th className="px-6 py-4 text-[10px] font-bold text-jual-text-muted uppercase tracking-widest w-[10%]">Status</th>
                                     <th className="px-6 py-4 text-[10px] font-bold text-jual-text-muted uppercase tracking-widest w-[15%]">{t('date_created')}</th>
                                     <th className="px-6 py-4 text-[10px] font-bold text-jual-text-muted uppercase tracking-widest w-[20%] text-right">{t('actions')}</th>
                                 </tr>
@@ -142,7 +153,24 @@ export default function Projects({ sales }) {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-1.5 text-xs font-bold text-amber-500">
-                                                    <Star className="w-4 h-4 fill-amber-500/20" /> {90 + (item.id % 10)}/100
+                                                    <Star className="w-4 h-4 fill-amber-500/20" /> {item.generated_content?.analysis?.score ?? (90 + (item.id % 10))}/100
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="relative inline-block w-full">
+                                                    <select
+                                                        value={item.status || 'draft'}
+                                                        onChange={(e) => updateStatus(item.id, e.target.value)}
+                                                        className={`appearance-none bg-transparent text-[10px] font-bold uppercase tracking-widest cursor-pointer focus:outline-none pr-6 py-1 border-b border-dashed ${
+                                                            item.status === 'published' ? 'text-emerald-500 border-emerald-500/30' : 
+                                                            item.status === 'downloaded' ? 'text-blue-500 border-blue-500/30' : 'text-slate-500 border-slate-500/30'
+                                                        }`}
+                                                    >
+                                                        <option value="draft" className="text-slate-900">Draft</option>
+                                                        <option value="downloaded" className="text-slate-900">Downloaded</option>
+                                                        <option value="published" className="text-slate-900">Published</option>
+                                                    </select>
+                                                    <ChevronDown className="w-3 h-3 absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none opacity-50" />
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">

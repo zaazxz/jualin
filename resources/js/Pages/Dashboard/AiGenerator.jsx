@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Head, useForm, router, Link } from '@inertiajs/react';
-import { Sparkles, Wand2, MessageSquare, Globe, Zap, Target, PenTool, Loader2, LayoutTemplate, Eye, ExternalLink, CheckCircle2, Palette, ArrowRight, ArrowLeft, Download } from 'lucide-react';
+import { Sparkles, Wand2, MessageSquare, Globe, Zap, Target, PenTool, Loader2, LayoutTemplate, Eye, ExternalLink, CheckCircle2, Palette, ArrowRight, ArrowLeft, Download, Star, AlertCircle } from 'lucide-react';
 import Layout from '@/Layouts/Dashboard/Layout';
 import axios from 'axios';
 import { useAppStore } from '@/store/useAppStore';
 
-export default function AiGenerator({ edit_sales }) {
-    const { t } = useAppStore();
+export default function AiGenerator({ edit_sales, sales_count = 0 }) {
+    const { t, language } = useAppStore();
     const [step, setStep] = useState('input'); // input, identity, template, preview
     const [isGenerating, setIsGenerating] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -14,6 +14,14 @@ export default function AiGenerator({ edit_sales }) {
     const [previewContent, setPreviewContent] = useState(null);
     const [templateOptions, setTemplateOptions] = useState([]);
     const [selectedTemplate, setSelectedTemplate] = useState(null);
+
+    const MAX_GENERATION = 5;
+    const isLimitReached = !edit_sales && sales_count >= MAX_GENERATION;
+    const remainingLimit = Math.max(0, MAX_GENERATION - sales_count);
+    const resetDate = new Date();
+    resetDate.setMonth(resetDate.getMonth() + 1);
+    resetDate.setDate(1);
+    const resetStr = resetDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long' });
 
     const simulateProgress = () => {
         setProgress(0);
@@ -65,7 +73,8 @@ export default function AiGenerator({ edit_sales }) {
                 web_name: data.web_name,
                 brand_color: data.brand_color,
                 features: data.features,
-                price: data.price
+                price: data.price,
+                language: language
             });
 
             const result = response.data;
@@ -85,12 +94,15 @@ export default function AiGenerator({ edit_sales }) {
             }
 
             setProgress(100);
-            setTimeout(() => setStep('template'), 500);
+            clearInterval(progressTimer);
+            setTimeout(() => {
+                setIsGenerating(false);
+                setStep('template');
+            }, 800);
         } catch (error) {
             console.error('Generation failed:', error);
             const errorMsg = error.response?.data?.error || error.message;
             alert(`Gagal Generate: ${errorMsg}`);
-        } finally {
             setIsGenerating(false);
             clearInterval(progressTimer);
         }
@@ -108,7 +120,7 @@ export default function AiGenerator({ edit_sales }) {
                 features: data.features,
                 price: data.price
             },
-            generated_content: previewContent?.copy,
+            generated_content: previewContent?.copy ? { ...previewContent.copy, analysis: previewContent.analysis } : null,
             html_content: previewContent?.html_content,
             template: JSON.stringify(selectedTemplate)
         };
@@ -134,6 +146,20 @@ export default function AiGenerator({ edit_sales }) {
             <Head title={t('ai_generator')} />
 
             <div className="max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+                {!edit_sales && (
+                    <div className={`mb-6 p-4 rounded-2xl flex items-center gap-3 border ${isLimitReached ? 'bg-red-500/10 border-red-500/20' : 'bg-emerald-500/10 border-emerald-500/20'}`}>
+                        <AlertCircle className={`w-5 h-5 flex-shrink-0 ${isLimitReached ? 'text-red-500' : 'text-emerald-500'}`} />
+                        <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <p className="text-sm font-medium text-jual-text-main">
+                                Sisa token AI Anda: <strong className={isLimitReached ? 'text-red-500' : 'text-emerald-500'}>{remainingLimit} / {MAX_GENERATION}</strong>
+                            </p>
+                            <p className="text-xs text-jual-text-muted">
+                                Limit akan di-reset pada <strong className="text-jual-text-main">{resetStr}</strong>
+                            </p>
+                        </div>
+                    </div>
+                )}
+
                 {/* Stepper Header */}
                 <div className="flex items-center justify-center gap-4 mb-10 overflow-x-auto py-4 scrollbar-none">
                     {steps.map((s, i) => (
@@ -304,9 +330,12 @@ export default function AiGenerator({ edit_sales }) {
                                         <ArrowLeft className="w-4 h-4" /> {t('back')}
                                     </button>
                                     <button
+                                        type="submit"
                                         onClick={handleStartGeneration}
-                                        disabled={isGenerating}
-                                        className={`relative overflow-hidden h-[56px] w-[240px] transition-all duration-300 ${isGenerating ? 'bg-jual-bg-alt' : 'bg-emerald-500 hover:bg-emerald-400'} text-slate-900 font-bold rounded-xl flex items-center justify-center gap-3 shadow-lg disabled:opacity-100`}
+                                        disabled={isGenerating || isLimitReached}
+                                        className={`flex-1 flex items-center justify-center gap-2 font-bold px-6 py-4 rounded-xl transition-all ${
+                                            isLimitReached ? 'bg-jual-border text-jual-text-muted cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-900 shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.4)]'
+                                        }`}
                                     >
                                         {isGenerating ? (
                                             <div className="w-full px-6 flex flex-col items-center gap-1">
@@ -322,7 +351,7 @@ export default function AiGenerator({ edit_sales }) {
                                                 </div>
                                             </div>
                                         ) : (
-                                            <>{t('generate_now')} <Sparkles className="w-4 h-4" /></>
+                                            <>{edit_sales ? 'Simpan & Generate Ulang' : isLimitReached ? 'Limit Habis' : t('generate_now')} {!isLimitReached && <Sparkles className="w-4 h-4" />}</>
                                         )}
                                     </button>
                                 </div>
@@ -384,6 +413,25 @@ export default function AiGenerator({ edit_sales }) {
                                 </button>
                             </div>
                         </div>
+
+                        {previewContent?.analysis && (
+                            <div className="bg-jual-card border border-jual-border rounded-2xl p-6 shadow-sm flex flex-col md:flex-row gap-6 items-start mt-6">
+                                <div className="flex flex-col items-center justify-center min-w-[140px] bg-jual-input p-4 rounded-xl border border-jual-border">
+                                    <div className="text-amber-500 font-bold mb-1 flex items-center gap-1.5 text-xs"><Star className="w-4 h-4 fill-amber-500" /> Skor AI</div>
+                                    <div className="text-4xl font-black text-jual-text-main">{previewContent.analysis.score}<span className="text-sm text-jual-text-muted">/100</span></div>
+                                </div>
+                                <div className="flex-1 space-y-3">
+                                    <h3 className="font-bold text-sm text-jual-text-main flex items-center gap-2"><Sparkles className="w-4 h-4 text-emerald-500" /> Saran Peningkatan</h3>
+                                    <ul className="space-y-2">
+                                        {previewContent.analysis.suggestions.map((sug, idx) => (
+                                            <li key={idx} className="text-sm text-jual-text-muted flex items-start gap-2">
+                                                <span className="text-emerald-500 mt-0.5 font-bold">•</span> <span>{sug}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Browser Window Mockup */}
                         <div className="rounded-3xl overflow-hidden border-[8px] sm:border-[12px] border-jual-card shadow-2xl relative transition-colors duration-500" style={{ backgroundColor: selectedTemplate?.bg_color || '#ffffff' }}>

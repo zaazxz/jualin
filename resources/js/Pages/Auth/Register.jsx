@@ -222,8 +222,8 @@ export default function Register() {
                                     </svg>
                                 </span>
                             </div>
-                            <label htmlFor="terms" className="ml-3 text-[11px] text-jual-text-muted cursor-pointer group-hover/check:text-jual-text-main transition-colors leading-tight">
-                                {t('agree_terms')}
+                            <label htmlFor="terms" className="ml-3 text-[11px] text-jual-text-muted cursor-pointer transition-colors leading-tight">
+                                {t('agree_terms')} <Link href="/terms" className="text-emerald-500 hover:underline hover:text-emerald-400 font-medium ml-1">{t('terms_badge')}</Link>
                             </label>
                         </div>
 
