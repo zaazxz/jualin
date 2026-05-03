@@ -22,6 +22,7 @@ class ProfileController extends Controller
         return Inertia::render('Dashboard/Settings', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
+            'salesCount' => \App\Models\Sales::where('user_id', Auth::id())->count(),
         ]);
     }
 
@@ -71,5 +72,14 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+
+    /**
+     * Check Gemini API health status.
+     */
+    public function checkApiStatus(\App\Services\GeminiService $gemini): \Illuminate\Http\JsonResponse
+    {
+        $status = $gemini->checkApiStatus();
+        return response()->json($status);
     }
 }

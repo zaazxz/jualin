@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Head, Link, usePage } from '@inertiajs/react';
-import { Rocket, FileText, Calendar, Clock, Eye, ShoppingCart, Plus, MoreVertical, ExternalLink, Sparkles, User, Trash2, ArrowRight, Star, Award, ArrowDownRight, TrendingUp } from 'lucide-react';
+import { Head, Link, usePage, useForm } from '@inertiajs/react';
+import { Rocket, FileText, Calendar, Clock, Eye, ShoppingCart, Plus, MoreVertical, ExternalLink, Sparkles, User, Trash2, ArrowRight, Star, Award, ArrowDownRight, TrendingUp, AlertCircle, Lock } from 'lucide-react';
 import Layout from '@/Layouts/Dashboard/Layout';
 import LoginSuccessModal from '@/Components/Dashboard/LoginSuccessModal';
 import { useAppStore } from '@/store/useAppStore';
@@ -9,6 +9,27 @@ export default function Dashboard({ sales }) {
     const { auth } = usePage().props;
     const [showWelcome, setShowWelcome] = useState(false);
     const { t } = useAppStore();
+    const [confirmDelete, setConfirmDelete] = useState(null);
+    const [processingId, setProcessingId] = useState(null);
+    const [alertMessage, setAlertMessage] = useState(null);
+    const { delete: destroy } = useForm();
+
+    const handleDelete = (id, e) => {
+        if (e) e.preventDefault();
+        setConfirmDelete(id);
+    };
+
+    const confirmDeletion = () => {
+        if (!confirmDelete) return;
+        setProcessingId(confirmDelete);
+        destroy(route('sales.destroy', confirmDelete), {
+            preserveScroll: true,
+            onFinish: () => {
+                setProcessingId(null);
+                setConfirmDelete(null);
+            },
+        });
+    };
 
     useEffect(() => {
         const hasShownWelcome = sessionStorage.getItem('hasShownWelcome');
@@ -21,24 +42,25 @@ export default function Dashboard({ sales }) {
     const localeMap = { 'id': 'id-ID', 'en': 'en-US', 'ms': 'ms-MY' };
     const currentLocale = localeMap[useAppStore.getState().language] || 'id-ID';
 
-    const totalPages = sales.length;
+    const salesData = sales.data || sales; // Fallback if not paginated
+    const totalPages = sales.total || salesData.length;
     
     let totalScore = 0;
     let scoredItemsCount = 0;
-    sales.forEach(item => {
+    salesData.forEach(item => {
         if (item.generated_content?.analysis?.score) {
             totalScore += Number(item.generated_content.analysis.score);
             scoredItemsCount++;
         }
     });
     const avgScore = scoredItemsCount > 0 ? Math.round(totalScore / scoredItemsCount) : 96;
-    const averageAiScore = sales.length > 0 ? `${avgScore}/100` : "0/100";
+    const averageAiScore = salesData.length > 0 ? `${avgScore}/100` : "0/100";
     
-    const lastActive = sales.length > 0 ? new Date(sales[0].created_at).toLocaleDateString(currentLocale, { day: 'numeric', month: 'short' }) : '-';
+    const lastActive = salesData.length > 0 ? new Date(salesData[0].created_at).toLocaleDateString(currentLocale, { day: 'numeric', month: 'short' }) : '-';
 
     const handleDownloadFromDashboard = (item) => {
         if (!item.html_content) {
-            alert(t('html_not_found'));
+            setAlertMessage(t('html_not_found'));
             return;
         }
 
@@ -87,7 +109,7 @@ export default function Dashboard({ sales }) {
             />
 
             {/* Welcome Banner */}
-            {sales.length === 0 && (
+            {salesData.length === 0 && (
                 <div className="bg-jual-card border border-jual-border rounded-2xl p-8 mb-8 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
                     <div className="relative z-10">
@@ -147,7 +169,7 @@ export default function Dashboard({ sales }) {
             </div>
 
             {/* Dashboard Analytics Sections */}
-            {sales.length > 0 && (
+            {salesData.length > 0 && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
                     {/* Top 3 Projects */}
                     <div className="bg-jual-card border border-jual-border rounded-2xl p-6">
@@ -155,7 +177,7 @@ export default function Dashboard({ sales }) {
                             <Star className="w-4 h-4 text-amber-500" /> 3 Proyek Terbaik
                         </h3>
                         <div className="space-y-4">
-                            {[...sales].sort((a, b) => (b.generated_content?.analysis?.score || 0) - (a.generated_content?.analysis?.score || 0)).slice(0, 3).map((item, idx) => (
+                            {[...salesData].sort((a, b) => (b.generated_content?.analysis?.score || 0) - (a.generated_content?.analysis?.score || 0)).slice(0, 3).map((item, idx) => (
                                 <div key={item.id} className="flex justify-between items-center bg-jual-bg-alt p-3 rounded-xl border border-jual-border/50">
                                     <div className="flex items-center gap-3">
                                         <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center text-xs font-bold">
@@ -176,7 +198,7 @@ export default function Dashboard({ sales }) {
                         </h3>
                         <div className="space-y-4">
                             {(() => {
-                                const under50 = sales.filter(s => (s.generated_content?.analysis?.score || 0) > 0 && (s.generated_content?.analysis?.score || 0) < 50);
+                                const under50 = salesData.filter(s => (s.generated_content?.analysis?.score || 0) > 0 && (s.generated_content?.analysis?.score || 0) < 50);
                                 if (under50.length === 0) return <p className="text-xs text-jual-text-muted italic mt-4">Hebat! Tidak ada proyek dengan skor di bawah 50.</p>;
                                 return under50.map((item) => (
                                     <div key={item.id} className="flex justify-between items-center bg-jual-bg-alt p-3 rounded-xl border border-jual-border/50">
@@ -194,7 +216,7 @@ export default function Dashboard({ sales }) {
                             <TrendingUp className="w-4 h-4 text-blue-500" /> Tren Skor AI
                         </h3>
                         <div className="h-32 flex items-end gap-2 px-2 pb-2 mt-auto">
-                            {[...sales].reverse().slice(-7).map((item, i) => {
+                            {[...salesData].reverse().slice(-7).map((item, i) => {
                                 const score = item.generated_content?.analysis?.score || 10; // Default small bar if no score
                                 return (
                                     <div key={item.id} className="flex-1 flex flex-col items-center gap-1 group">
@@ -222,16 +244,16 @@ export default function Dashboard({ sales }) {
                     <h2 className="text-xl font-bold text-jual-text-main mb-1">{t('recent_projects')}</h2>
                     <p className="text-xs text-jual-text-muted">{t('manage_recent_projects_desc')}</p>
                 </div>
-                {sales.length > 0 && (
+                {sales.data.length > 0 && (
                     <Link href={route('dashboard.projects')} className="text-xs text-emerald-500 hover:text-emerald-400 font-bold flex items-center gap-1 transition-colors uppercase tracking-widest">
                         {t('view_all')} <ArrowRight className="w-3 h-3" />
                     </Link>
                 )}
             </div>
 
-            {sales.length > 0 ? (
+            {sales.data.length > 0 ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {sales.map((item) => (
+                    {sales.data.map((item) => (
                         <div key={item.id} className="bg-jual-card border border-jual-border rounded-2xl p-5 flex flex-col sm:flex-row gap-5 border-l-4 border-l-emerald-500 hover:bg-jual-card-hover transition-all duration-300 group">
                             <div className="w-full sm:w-32 aspect-square bg-jual-input rounded-xl flex items-center justify-center border border-jual-border group-hover:border-emerald-500/20 transition-colors overflow-hidden">
                                 {item.generated_content?.hero_image ? (
@@ -245,8 +267,12 @@ export default function Dashboard({ sales }) {
                                     <div className="flex justify-between items-start mb-2">
                                         <h3 className="font-bold text-jual-text-main group-hover:text-emerald-400 transition-colors line-clamp-1">{item.product_name}</h3>
                                         <div className="flex gap-2">
-                                            <span className={`text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-tighter ${
-                                                item.status === 'published' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-500/10 text-slate-500'
+                                            <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider transition-all duration-300 ${
+                                                item.status === 'published' 
+                                                    ? 'bg-emerald-500 text-slate-950 shadow-[0_0_15px_rgba(16,185,129,0.4)]' 
+                                                    : item.status === 'downloaded'
+                                                        ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20'
+                                                        : 'bg-slate-500/10 text-slate-500 border border-slate-500/20'
                                             }`}>
                                                 {item.status}
                                             </span>
@@ -274,26 +300,43 @@ export default function Dashboard({ sales }) {
                                     >
                                         {t('live_preview')}
                                     </a>
-                                    <Link 
-                                        href={route('dashboard.ai-generator', item.id)}
-                                        className="bg-jual-input hover:bg-amber-500/10 text-[10px] font-bold text-jual-text-muted hover:text-amber-400 px-4 py-2 rounded-lg transition-all border border-jual-border hover:border-amber-500/30"
-                                    >
-                                        {t('edit')}
-                                    </Link>
+                                    {/* Edit Button - Hidden if Published */}
+                                    {item.status !== 'published' && (
+                                        <Link 
+                                            href={route('dashboard.ai-generator', item.id)}
+                                            className="bg-jual-input hover:bg-amber-500/10 text-[10px] font-bold text-jual-text-muted hover:text-amber-400 px-4 py-2 rounded-lg transition-all border border-jual-border hover:border-amber-500/30"
+                                        >
+                                            {t('edit')}
+                                        </Link>
+                                    )}
+
+                                    {/* Download Button - Always Visible */}
                                     <button 
                                         onClick={() => handleDownloadFromDashboard(item)}
                                         className="bg-emerald-500/10 hover:bg-emerald-500 text-[10px] font-bold text-emerald-500 hover:text-slate-900 px-4 py-2 rounded-lg transition-all border border-emerald-500/20 hover:border-emerald-500"
                                     >
                                         {t('download_html')}
                                     </button>
-                                    <Link
-                                        href={route('sales.destroy', item.id)}
-                                        method="delete"
-                                        as="button"
-                                        className="bg-transparent hover:bg-red-500/10 text-[10px] font-bold text-jual-text-muted hover:text-red-500 px-3 py-2 rounded-lg transition-all border border-transparent hover:border-red-500/20 ml-auto"
-                                    >
-                                        <Trash2 className="w-3.5 h-3.5" />
-                                    </Link>
+
+                                    {/* Delete Button - Hidden if Published */}
+                                    {item.status !== 'published' ? (
+                                        <button 
+                                            onClick={(e) => handleDelete(item.id, e)}
+                                            disabled={processingId === item.id}
+                                            className={`bg-transparent hover:bg-red-500/10 text-[10px] font-bold text-jual-text-muted hover:text-red-500 px-3 py-2 rounded-lg transition-all border border-transparent hover:border-red-500/20 ml-auto ${processingId === item.id ? 'opacity-50 cursor-wait' : ''}`}
+                                        >
+                                            {processingId === item.id ? (
+                                                <div className="w-3.5 h-3.5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                                            ) : (
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                            )}
+                                        </button>
+                                    ) : (
+                                        <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/5 border border-emerald-500/10 rounded-lg text-emerald-500/40 ml-auto">
+                                            <Lock className="w-3.5 h-3.5" />
+                                            <span className="text-[10px] font-black uppercase tracking-tighter">Locked</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -321,6 +364,68 @@ export default function Dashboard({ sales }) {
             <div className="flex justify-center mt-12 pb-8">
                 <Sparkles className="w-16 h-16 text-emerald-500/5" />
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {confirmDelete && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setConfirmDelete(null)}></div>
+                    <div className="bg-jual-bg border border-jual-border rounded-3xl w-full max-w-sm relative z-10 overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+                        <div className="p-6">
+                            <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center border border-red-500/20 mb-4 mx-auto">
+                                <Trash2 className="w-6 h-6 text-red-500" />
+                            </div>
+                            <h3 className="text-xl font-bold text-jual-text-main text-center mb-2">Konfirmasi Hapus</h3>
+                            <p className="text-sm text-jual-text-muted text-center mb-6">
+                                Apakah Anda yakin ingin menghapus proyek ini? Tindakan ini tidak dapat dibatalkan.
+                            </p>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setConfirmDelete(null)}
+                                    disabled={processingId === confirmDelete}
+                                    className="flex-1 py-2.5 bg-jual-input hover:bg-jual-card border border-jual-border rounded-xl text-sm font-bold text-jual-text-main transition-colors disabled:opacity-50"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={confirmDeletion}
+                                    disabled={processingId === confirmDelete}
+                                    className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-bold transition-colors flex justify-center items-center disabled:opacity-50"
+                                >
+                                    {processingId === confirmDelete ? (
+                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    ) : (
+                                        "Ya, Hapus"
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Alert Modal */}
+            {alertMessage && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setAlertMessage(null)}></div>
+                    <div className="bg-jual-bg border border-jual-border rounded-3xl w-full max-w-sm relative z-10 overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+                        <div className="p-6 text-center">
+                            <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center border border-amber-500/20 mb-4 mx-auto">
+                                <AlertCircle className="w-6 h-6 text-amber-500" />
+                            </div>
+                            <h3 className="text-xl font-bold text-jual-text-main mb-2">Pemberitahuan</h3>
+                            <p className="text-sm text-jual-text-muted mb-6 leading-relaxed">
+                                {alertMessage}
+                            </p>
+                            <button
+                                onClick={() => setAlertMessage(null)}
+                                className="w-full py-2.5 bg-jual-input hover:bg-jual-card border border-jual-border rounded-xl text-sm font-bold text-jual-text-main transition-colors"
+                            >
+                                Mengerti
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
         </Layout>
     );

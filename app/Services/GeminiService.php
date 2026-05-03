@@ -35,16 +35,12 @@ class GeminiService
             . $priceText
             . "Brand Name: {$webName} | Primary Accent Color: {$brandColor}\n\n"
             . "CRITICAL UI/UX DESIGN RULES (Must Follow Strictly):\n"
-            . "1. USE TAILWIND CSS EXTENSIVELY. The page must look professionally designed, modern, and expensive.\n"
+            . "1. CREATIVITY & VARIETY: You MUST generate wildly different layouts, HTML structures, and Tailwind grids every time. Use asymmetrical grids, masonry layouts, split screens, zigzag sections, overlapping cards, etc. Do NOT output the same generic stack of sections. Be highly creative and dynamic.\n"
             . "2. LAYOUT: Use `min-h-screen`, generous padding (`py-24` to `py-32`), and max-width containers (`max-w-7xl mx-auto px-4 sm:px-6`).\n"
             . "3. TYPOGRAPHY: Use 'Inter' for body, 'Playfair Display' for headlines. Headlines must be massive and bold (`text-5xl md:text-7xl font-black tracking-tight`).\n"
             . "4. ADAPTIVE COLORS (CRUCIAL): Your HTML will be placed inside a <body> where the background and text color change dynamically (Light, Dark, Glass). DO NOT hardcode solid backgrounds like `bg-white` or `bg-slate-900` on large sections. Use `bg-black/5` or `bg-white/10`, `backdrop-blur-md`, and `text-inherit` so your design adapts perfectly to any template.\n"
-            . "5. COMPONENTS:\n"
-            . "   - Navbar: Sticky top, glassmorphism (`backdrop-blur-md bg-inherit/80`), clear Logo, elegant links, solid CTA button.\n"
-            . "   - Hero: Stunning layout. The hero image MUST be wrapped beautifully (`rounded-3xl shadow-2xl ring-1 ring-white/10 overflow-hidden`).\n"
-            . "   - Benefits: A clean grid (`grid-cols-1 md:grid-cols-3 gap-8`). Cards must have hover effects (`hover:-translate-y-2 transition-all`), soft borders (`border border-current/10`), and icons.\n"
-            . "   - FAQ & Footer: Clean, minimalist, and easy to read.\n"
-            . "6. HERO IMAGE: For 'hero_image' in the copy, you MUST provide a valid working image URL from unsplash like 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200'. NEVER leave it blank.\n\n"
+            . "5. COMPONENTS: Include stunning Hero sections, interactive-looking Benefits cards with hover effects (`hover:-translate-y-2`), Testimonials, and a strong CTA footer.\n"
+            . "6. HERO IMAGE: For 'hero_image', you MUST use a REAL, working Unsplash image URL (e.g. 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab'). Use your vast knowledge to find an exact photo ID that matches the product. If you cannot remember a highly accurate Unsplash ID, use 'https://loremflickr.com/1200/800/{keyword_of_product},product' as a fallback. DO NOT generate fake/broken Unsplash IDs.\n\n"
             . "OUTPUT REQUIREMENTS:\n"
             . "Provide ONLY valid JSON. No markdown backticks.\n"
             . '{
@@ -55,7 +51,17 @@ class GeminiService
                     "seo_score": 88,
                     "copywriting_score": 92,
                     "ui_ux_score": 96,
-                    "suggestions": ["suggestion 1", "suggestion 2"],
+                    "suggestions": [
+                        "Saran 1...",
+                        "Saran 2..."
+                    ],
+                    "improved_inputs": {
+                        "description": "Rewritten, highly compelling product description that applies all your suggestions...",
+                        "features": "Rewritten, expanded list of USPs that applies your suggestions...",
+                        "price": "Optimized pricing text (e.g. Rp 99.000 (Diskon 50%))...",
+                        "audience": "More specific and targeted audience description...",
+                        "tone": "Optimized tone..."
+                    },
                     "market_research": "Short market research about similar products...",
                     "target_audience_analysis": "Insights on the specific audience..."
                 },
@@ -162,5 +168,62 @@ class GeminiService
 
         Log::error("Gemini API Error: " . $response->body());
         return null;
+    }
+
+    public function checkApiStatus()
+    {
+        if (empty($this->apiKey)) {
+            return ['status' => 'missing', 'message' => 'API Key tidak ditemukan di file .env'];
+        }
+
+        try {
+            $response = Http::withoutVerifying()
+                ->timeout(10)
+                ->post($this->baseUrl . $this->model . ':generateContent?key=' . $this->apiKey, [
+                    'contents' => [['parts' => [['text' => 'Respond with "pong"']]]],
+                    'generationConfig' => [
+                        'maxOutputTokens' => 10,
+                    ],
+                ]);
+
+            if ($response->successful()) {
+                return [
+                    'status' => 'active', 
+                    'message' => 'API Key Aktif',
+                    'details' => 'Model: ' . $this->model
+                ];
+            }
+
+            $error = $response->json('error.message') ?? 'Unknown Error';
+            $status = $response->status();
+
+            if ($status === 429) {
+                return [
+                    'status' => 'limit_reached', 
+                    'message' => 'Limit Tercapai (429)',
+                    'details' => 'Kuota harian/menit Gemini Free Tier sudah habis.'
+                ];
+            }
+
+            if ($status === 403 || $status === 401) {
+                return [
+                    'status' => 'invalid', 
+                    'message' => 'Key Tidak Valid (403)',
+                    'details' => 'API Key salah atau sudah tidak berlaku.'
+                ];
+            }
+
+            return [
+                'status' => 'error', 
+                'message' => 'API Error (' . $status . ')',
+                'details' => $error
+            ];
+        } catch (\Exception $e) {
+            return [
+                'status' => 'error', 
+                'message' => 'Koneksi Gagal',
+                'details' => $e->getMessage()
+            ];
+        }
     }
 }

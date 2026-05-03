@@ -42,7 +42,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     Route::get('/dashboard', [SalesController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/projects', [SalesController::class, 'projects'])->name('dashboard.projects');
-    Route::get('/dashboard/analytics', [SalesController::class, 'analytics'])->name('dashboard.analytics');
+    Route::get('/dashboard/analytics/{sales?}', [SalesController::class, 'analytics'])->name('dashboard.analytics');
     Route::post('/sales/generate', [SalesController::class, 'generate'])->name('sales.generate');
     Route::post('/sales/daily-insight', [SalesController::class, 'dailyInsight'])->name('sales.insight');
 
@@ -52,6 +52,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/dashboard/ai-generator/{sales?}', function (\App\Models\Sales $sales = null) {
         if ($sales && $sales->user_id !== auth()->id()) abort(403);
+        if ($sales && $sales->status === 'published') return redirect()->route('dashboard.projects')->withErrors(['message' => 'Proyek yang sudah dipublikasikan tidak dapat diedit.']);
         $salesCount = \App\Models\Sales::where('user_id', auth()->id())->count();
         return Inertia::render('Dashboard/AiGenerator', [
             'edit_sales' => $sales,
@@ -62,6 +63,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/api/check-api-status', [ProfileController::class, 'checkApiStatus'])->name('api.check-status');
 
 });
 

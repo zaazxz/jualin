@@ -1,6 +1,7 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { Check, ArrowRight, Zap, Mail, Globe, MessageSquare, Star, Award, TrendingUp, Sparkles } from 'lucide-react';
+import DOMPurify from 'dompurify';
 
 export default function Preview({ sales }) {
     const { product_name, generated_content, product_info } = sales;
@@ -26,7 +27,7 @@ export default function Preview({ sales }) {
                 style={{ backgroundColor: template.bg_color, color: template.text_color }}
             >
                 <Head title={content.headline || product_name} />
-                <div dangerouslySetInnerHTML={{ __html: sales.html_content }} />
+                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(sales.html_content) }} />
             </div>
         );
     }
