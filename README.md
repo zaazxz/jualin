@@ -28,18 +28,21 @@
 - 🔑 **Google OAuth Integration** — Seamless login and registration using Google accounts
 - 👤 **Profile Management** — Personalize your account with custom profile pictures (manual upload or auto-fetch from Google)
 - 🔐 **Advanced Security** — Update password, manage account settings, and 2FA-ready UI
+- 📊 **Usage Monitoring** — Built-in subscription bar to track your AI page generation quota
+- 🩺 **API Health Check** — Real-time Gemini API status monitoring directly from the settings dashboard
+- 🔐 **Project Integrity** — Smart locking system for published projects to ensure data consistency
 - 📥 **One-Click HTML Export** — Download your sales page as a standalone HTML file
 - 👁️ **Live Preview** — Browser-mockup preview before saving or downloading
-- 📁 **Project Management** — Save, edit, regenerate, and manage all your sales pages
-- 📧 **Email Verification** — Secure account validation system
+- 📁 **Project Management** — Save, edit, regenerate, and manage all your sales pages with dynamic status updates
 
 ### 🆕 What's New? (May 2026 Update)
 
-- **Token Limit System:** Added a robust quota system limiting AI generation to 5 tokens per user, with automatic monthly resets and visual limit warnings.
+- **AI Usage Tracker:** A premium progress bar in the settings page to monitor your project quota (Free: 5 pages).
+- **Real-time API Diagnostics:** Check your Gemini API Key health, rate limits, and connectivity status with a single click.
+- **Smart Project Locking:** Published projects are now "Locked" to prevent accidental modifications to live content, while still allowing you to change visibility status.
+- **Neon Glow UI:** Updated project status badges with a modern neon/glow aesthetic for better visibility and premium feel.
+- **Persistent Analytics:** Access to detailed analytics and HTML downloads even after a project is published.
 - **Daily AI Insights:** A new real-time floating AI assistant on the dashboard providing daily trending product tips and copywriting strategies.
-- **Dynamic Dashboard:** Welcome banner now intelligently hides when users start creating projects, maximizing workspace.
-- **Inline Project Status:** Change project statuses (Draft, Downloaded, Published) directly from the list without reloading.
-- **Polished UX:** Fully adaptive Terms & Conditions page supporting Light/Dark mode and multilingual translations, and streamlined security settings.
 
 ---
 
@@ -207,7 +210,8 @@ jualin/
 | `GET /dashboard/projects`     | My Projects (saved pages)      |
 | `GET /dashboard/settings`     | Account settings               |
 | `GET /s/{slug}`               | Public sales page preview      |
-| `POST /sales/generate`        | Trigger AI generation (Gemini) |
+| `GET /api/check-api-status` | Real-time Gemini API health check |
+| `POST /sales/generate`      | Trigger AI generation (Gemini)    |
 
 ---
 
