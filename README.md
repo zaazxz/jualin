@@ -33,43 +33,55 @@
 - 📁 **Project Management** — Save, edit, regenerate, and manage all your sales pages
 - 📧 **Email Verification** — Secure account validation system
 
+### 🆕 What's New? (May 2026 Update)
+
+- **Token Limit System:** Added a robust quota system limiting AI generation to 5 tokens per user, with automatic monthly resets and visual limit warnings.
+- **Daily AI Insights:** A new real-time floating AI assistant on the dashboard providing daily trending product tips and copywriting strategies.
+- **Dynamic Dashboard:** Welcome banner now intelligently hides when users start creating projects, maximizing workspace.
+- **Inline Project Status:** Change project statuses (Draft, Downloaded, Published) directly from the list without reloading.
+- **Polished UX:** Fully adaptive Terms & Conditions page supporting Light/Dark mode and multilingual translations, and streamlined security settings.
+
 ---
 
 ## 🛠️ Tech Stack
 
 ### Backend
-| Technology | Version | Description |
-|---|---|---|
-| **PHP** | ^8.1 | Server-side language |
-| **Laravel** | ^10.10 | MVC framework — routing, auth, Eloquent ORM |
-| **Laravel Breeze** | ^1.29 | Authentication scaffolding (login, register, verify, reset) |
-| **Laravel Sanctum** | ^3.2 | API token & session authentication |
-| **Inertia.js (Server)** | ^2.0 | Adapter connecting Laravel to React without a separate API |
-| **Laravel Socialite** | ^5.16 | OAuth authentication for Google Login |
-| **Tighten Ziggy** | ^2.0 | Exposes Laravel named routes to the frontend |
-| **Guzzle HTTP** | ^7.2 | HTTP client used to call the Gemini AI API |
+
+| Technology              | Version | Description                                                 |
+| ----------------------- | ------- | ----------------------------------------------------------- |
+| **PHP**                 | ^8.1    | Server-side language                                        |
+| **Laravel**             | ^10.10  | MVC framework — routing, auth, Eloquent ORM                 |
+| **Laravel Breeze**      | ^1.29   | Authentication scaffolding (login, register, verify, reset) |
+| **Laravel Sanctum**     | ^3.2    | API token & session authentication                          |
+| **Inertia.js (Server)** | ^2.0    | Adapter connecting Laravel to React without a separate API  |
+| **Laravel Socialite**   | ^5.16   | OAuth authentication for Google Login                       |
+| **Tighten Ziggy**       | ^2.0    | Exposes Laravel named routes to the frontend                |
+| **Guzzle HTTP**         | ^7.2    | HTTP client used to call the Gemini AI API                  |
 
 ### Frontend
-| Technology | Version | Description |
-|---|---|---|
-| **React** | ^19 | UI component library |
-| **Inertia.js (Client)** | ^2.0 | SPA-style navigation without a full API layer |
-| **Tailwind CSS** | ^4.x | Utility-first CSS framework |
-| **Vite** | ^5.0 | Lightning-fast frontend build tool & dev server |
-| **Zustand** | ^5.0 | Lightweight global state management (theme, language) |
-| **Lucide React** | ^1.11 | Icon library |
-| **Axios** | ^1.6 | HTTP client for frontend API calls |
+
+| Technology              | Version | Description                                           |
+| ----------------------- | ------- | ----------------------------------------------------- |
+| **React**               | ^19     | UI component library                                  |
+| **Inertia.js (Client)** | ^2.0    | SPA-style navigation without a full API layer         |
+| **Tailwind CSS**        | ^4.x    | Utility-first CSS framework                           |
+| **Vite**                | ^5.0    | Lightning-fast frontend build tool & dev server       |
+| **Zustand**             | ^5.0    | Lightweight global state management (theme, language) |
+| **Lucide React**        | ^1.11   | Icon library                                          |
+| **Axios**               | ^1.6    | HTTP client for frontend API calls                    |
 
 ### AI & External Services
-| Service | Usage |
-|---|---|
+
+| Service              | Usage                                                        |
+| -------------------- | ------------------------------------------------------------ |
 | **Google Gemini AI** | Generates all copywriting content and HTML sales page output |
-| **Gmail SMTP** | Transactional email (verification, password reset) |
+| **Gmail SMTP**       | Transactional email (verification, password reset)           |
 
 ### Database
-| Technology | Description |
-|---|---|
-| **MySQL** | Primary relational database |
+
+| Technology | Description                 |
+| ---------- | --------------------------- |
+| **MySQL**  | Primary relational database |
 
 ---
 
@@ -78,6 +90,7 @@
 ### Prerequisites
 
 Make sure you have the following installed:
+
 - PHP >= 8.1 with extensions: `pdo`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`
 - Composer
 - Node.js >= 18.x & npm
@@ -87,29 +100,35 @@ Make sure you have the following installed:
 ### Installation
 
 **1. Clone the repository**
+
 ```bash
 git clone https://github.com/your-username/jualin.git
 cd jualin
 ```
 
 **2. Install PHP dependencies**
+
 ```bash
 composer install
 ```
 
 **3. Install JavaScript dependencies**
+
 ```bash
 npm install
 ```
 
 **4. Configure environment**
+
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
+
 Open `.env` and fill in your database credentials, mail settings, and Gemini API key.
 
 **5. Run database migrations**
+
 ```bash
 php artisan migrate
 ```
@@ -117,6 +136,7 @@ php artisan migrate
 **6. Start development servers**
 
 Open two terminals:
+
 ```bash
 # Terminal 1 — Laravel backend
 php artisan serve
@@ -126,8 +146,9 @@ npm run dev
 ```
 
 **7. Open in browser**
+
 ```
-http://localhost:8000
+http://127.0.0.1:8000
 ```
 
 ---
@@ -136,16 +157,16 @@ http://localhost:8000
 
 Copy `.env.example` to `.env` and configure the following key variables:
 
-| Variable | Description |
-|---|---|
-| `APP_NAME` | Your application name |
-| `APP_URL` | The full URL of your app (e.g., `http://localhost:8000`) |
-| `DB_*` | Database connection details |
-| `MAIL_*` | SMTP credentials for sending emails |
-| `GEMINI_API_KEY` | Your Google Gemini API key — **required for AI generation** |
-| `GOOGLE_CLIENT_ID` | Your Google Cloud Client ID for OAuth |
-| `GOOGLE_CLIENT_SECRET` | Your Google Cloud Client Secret for OAuth |
-| `GOOGLE_REDIRECT_URI` | `http://127.0.0.1:8000/auth/google/callback` |
+| Variable               | Description                                                 |
+| ---------------------- | ----------------------------------------------------------- |
+| `APP_NAME`             | Your application name                                       |
+| `APP_URL`              | The full URL of your app (e.g., `http://localhost:8000`)    |
+| `DB_*`                 | Database connection details                                 |
+| `MAIL_*`               | SMTP credentials for sending emails                         |
+| `GEMINI_API_KEY`       | Your Google Gemini API key — **required for AI generation** |
+| `GOOGLE_CLIENT_ID`     | Your Google Cloud Client ID for OAuth                       |
+| `GOOGLE_CLIENT_SECRET` | Your Google Cloud Client Secret for OAuth                   |
+| `GOOGLE_REDIRECT_URI`  | `http://127.0.0.1:8000/auth/google/callback`                |
 
 > ⚠️ Never commit your real `.env` file to version control. Only commit `.env.example`.
 
@@ -176,17 +197,17 @@ jualin/
 
 ## 🌐 Available Routes
 
-| Route | Description |
-|---|---|
-| `GET /` | Landing page |
-| `GET /login` | Login page |
-| `GET /register` | Registration page |
-| `GET /dashboard` | Main dashboard |
-| `GET /dashboard/ai-generator` | AI Sales Page Generator |
-| `GET /dashboard/projects` | My Projects (saved pages) |
-| `GET /dashboard/settings` | Account settings |
-| `GET /s/{slug}` | Public sales page preview |
-| `POST /sales/generate` | Trigger AI generation (Gemini) |
+| Route                         | Description                    |
+| ----------------------------- | ------------------------------ |
+| `GET /`                       | Landing page                   |
+| `GET /login`                  | Login page                     |
+| `GET /register`               | Registration page              |
+| `GET /dashboard`              | Main dashboard                 |
+| `GET /dashboard/ai-generator` | AI Sales Page Generator        |
+| `GET /dashboard/projects`     | My Projects (saved pages)      |
+| `GET /dashboard/settings`     | Account settings               |
+| `GET /s/{slug}`               | Public sales page preview      |
+| `POST /sales/generate`        | Trigger AI generation (Gemini) |
 
 ---
 

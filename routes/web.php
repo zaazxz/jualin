@@ -42,7 +42,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     Route::get('/dashboard', [SalesController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/projects', [SalesController::class, 'projects'])->name('dashboard.projects');
+    Route::get('/dashboard/analytics', [SalesController::class, 'analytics'])->name('dashboard.analytics');
     Route::post('/sales/generate', [SalesController::class, 'generate'])->name('sales.generate');
+    Route::post('/sales/daily-insight', [SalesController::class, 'dailyInsight'])->name('sales.insight');
 
     Route::delete('/sales/{sales}', [SalesController::class, 'destroy'])->name('sales.destroy');
     Route::post('/sales', [SalesController::class, 'store'])->name('sales.store');
@@ -50,8 +52,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/dashboard/ai-generator/{sales?}', function (\App\Models\Sales $sales = null) {
         if ($sales && $sales->user_id !== auth()->id()) abort(403);
+        $salesCount = \App\Models\Sales::where('user_id', auth()->id())->count();
         return Inertia::render('Dashboard/AiGenerator', [
-            'edit_sales' => $sales
+            'edit_sales' => $sales,
+            'sales_count' => $salesCount
         ]);
     })->name('dashboard.ai-generator');
 

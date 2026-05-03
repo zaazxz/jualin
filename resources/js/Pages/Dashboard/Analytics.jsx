@@ -1,11 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Head } from '@inertiajs/react';
-import { BarChart3, TrendingUp, Users, ShoppingCart, ArrowUpRight, ArrowDownRight, Calendar, Download, MousePointerClick, Globe2 } from 'lucide-react';
+import { BarChart3, TrendingUp, Users, ShoppingCart, ArrowUpRight, ArrowDownRight, Calendar, Download, MousePointerClick, Globe2, Sparkles, BookOpen, Target, Star, ChevronDown } from 'lucide-react';
 import Layout from '@/Layouts/Dashboard/Layout';
 import { useAppStore } from '@/store/useAppStore';
 
-export default function Analytics() {
+export default function Analytics({ sales = [] }) {
     const { t } = useAppStore();
+    const [selectedId, setSelectedId] = useState(sales.length > 0 ? sales[0].id : null);
+    
+    const selectedProject = sales.find(s => s.id === selectedId);
+    const analysis = selectedProject?.generated_content?.analysis || {};
 
     return (
         <Layout>
@@ -25,31 +29,38 @@ export default function Analytics() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <button className="bg-jual-input border border-jual-border px-4 py-2.5 rounded-xl text-sm font-medium text-jual-text-muted flex items-center gap-2 hover:border-emerald-500/30 transition-colors">
-                            <Calendar className="w-4 h-4" /> {t('last_30_days')}
-                        </button>
-                        <button className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 transition-all shadow-[0_4px_15px_rgba(16,185,129,0.2)]">
-                            <Download className="w-4 h-4" /> {t('export')}
-                        </button>
+                        <div className="relative">
+                            <select 
+                                value={selectedId || ''} 
+                                onChange={(e) => setSelectedId(Number(e.target.value))}
+                                className="appearance-none bg-jual-input border border-jual-border pl-4 pr-10 py-2.5 rounded-xl text-sm font-bold text-jual-text-main focus:outline-none focus:border-emerald-500/50 cursor-pointer min-w-[200px]"
+                            >
+                                {sales.length === 0 && <option value="">Belum ada proyek</option>}
+                                {sales.map(s => (
+                                    <option key={s.id} value={s.id}>{s.product_name}</option>
+                                ))}
+                            </select>
+                            <ChevronDown className="w-4 h-4 text-jual-text-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        </div>
                     </div>
                 </div>
 
-                {/* Key Metrics Grid */}
+                {/* Key Metrics Grid - AI Scores */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                     {[
-                        { label: t('total_revenue'), value: 'Rp 42.5M', growth: '+12.5%', up: true, icon: TrendingUp, color: 'text-emerald-500' },
-                        { label: t('total_traffic'), value: '84.2k', growth: '+5.2%', up: true, icon: Users, color: 'text-blue-500' },
-                        { label: t('conversion_rate'), value: '3.42%', growth: '-0.8%', up: false, icon: MousePointerClick, color: 'text-purple-500' },
-                        { label: t('sales_order'), value: '1,240', growth: '+18.4%', up: true, icon: ShoppingCart, color: 'text-orange-500' },
+                        { label: 'Overall Score', value: analysis.score ? `${analysis.score}/100` : '-', up: (analysis.score || 0) >= 80, icon: Star, color: 'text-amber-500' },
+                        { label: 'SEO Score', value: analysis.seo_score ? `${analysis.seo_score}/100` : '-', up: (analysis.seo_score || 0) >= 80, icon: Globe2, color: 'text-blue-500' },
+                        { label: 'Copywriting Score', value: analysis.copywriting_score ? `${analysis.copywriting_score}/100` : '-', up: (analysis.copywriting_score || 0) >= 80, icon: Sparkles, color: 'text-purple-500' },
+                        { label: 'UI/UX Score', value: analysis.ui_ux_score ? `${analysis.ui_ux_score}/100` : '-', up: (analysis.ui_ux_score || 0) >= 80, icon: MousePointerClick, color: 'text-emerald-500' },
                     ].map((m, i) => (
                         <div key={i} className="bg-jual-card border border-jual-border rounded-2xl p-6 relative overflow-hidden group">
                             <div className="flex justify-between items-start mb-4">
                                 <div className={`w-10 h-10 rounded-xl bg-jual-input border border-jual-border flex items-center justify-center ${m.color}`}>
                                     <m.icon className="w-5 h-5" />
                                 </div>
-                                <div className={`flex items-center gap-1 text-xs font-bold ${m.up ? 'text-emerald-500' : 'text-red-500'}`}>
+                                <div className={`flex items-center gap-1 text-xs font-bold ${m.up ? 'text-emerald-500' : 'text-amber-500'}`}>
                                     {m.up ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                                    {m.growth}
+                                    AI
                                 </div>
                             </div>
                             <h4 className="text-xs font-bold text-jual-text-muted uppercase tracking-widest mb-1">{m.label}</h4>
@@ -59,67 +70,53 @@ export default function Analytics() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Traffic Chart Placeholder */}
-                    <div className="lg:col-span-2 bg-jual-card border border-jual-border rounded-3xl p-8 relative overflow-hidden">
-                        <div className="flex justify-between items-center mb-8">
-                            <h3 className="text-lg font-bold text-jual-text-main">{t('sales_chart')}</h3>
-                            <div className="flex gap-2">
-                                <span className="flex items-center gap-1.5 text-xs text-jual-text-muted">
-                                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div> {t('sales')}
-                                </span>
-                                <span className="flex items-center gap-1.5 text-xs text-jual-text-muted">
-                                    <div className="w-2 h-2 rounded-full bg-jual-border"></div> {t('target')}
-                                </span>
+                    {/* Insights & Research */}
+                    <div className="lg:col-span-2 space-y-8">
+                        <div className="bg-jual-card border border-jual-border rounded-3xl p-8 relative overflow-hidden">
+                            <div className="flex items-center gap-3 mb-6">
+                                <BookOpen className="w-6 h-6 text-emerald-500" />
+                                <h3 className="text-lg font-bold text-jual-text-main">Hasil Riset Pasar</h3>
                             </div>
+                            <p className="text-sm text-jual-text-muted leading-relaxed">
+                                {analysis.market_research || "Belum ada riset pasar untuk produk ini. Silakan generate ulang menggunakan fitur AI Generator terbaru."}
+                            </p>
                         </div>
                         
-                        {/* Mock Chart Visualization */}
-                        <div className="h-[300px] w-full flex items-end gap-3 px-2">
-                            {[40, 65, 45, 90, 75, 55, 80, 60, 95, 70, 85, 100].map((h, i) => (
-                                <div key={i} className="flex-1 flex flex-col items-center gap-2 group">
-                                    <div className="w-full relative">
-                                        <div 
-                                            className="w-full bg-emerald-500/10 group-hover:bg-emerald-500/20 rounded-t-lg transition-all duration-500 border-x border-t border-emerald-500/20" 
-                                            style={{ height: `${h}%` }}
-                                        >
-                                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-jual-card text-jual-text-main text-[10px] font-bold px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-sm border border-jual-border">
-                                                {h} {t('million')}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <span className="text-[10px] text-jual-text-muted font-bold">{i + 1} Apr</span>
-                                </div>
-                            ))}
+                        <div className="bg-jual-card border border-jual-border rounded-3xl p-8 relative overflow-hidden">
+                            <div className="flex items-center gap-3 mb-6">
+                                <Target className="w-6 h-6 text-blue-500" />
+                                <h3 className="text-lg font-bold text-jual-text-main">Analisis Target Audiens</h3>
+                            </div>
+                            <p className="text-sm text-jual-text-muted leading-relaxed">
+                                {analysis.target_audience_analysis || "Belum ada analisis target audiens. Silakan generate ulang."}
+                            </p>
                         </div>
                     </div>
 
-                    {/* Top Device / Source */}
-                    <div className="bg-jual-card border border-jual-border rounded-3xl p-8">
-                        <h3 className="text-lg font-bold text-jual-text-main mb-6">{t('traffic_source')}</h3>
-                        <div className="space-y-6">
-                            {[
-                                { name: t('google_search'), icon: Globe2, value: '45%', color: 'bg-blue-500' },
-                                { name: t('direct_traffic'), icon: MousePointerClick, value: '30%', color: 'bg-emerald-500' },
-                                { name: t('social_media'), icon: Users, value: '25%', color: 'bg-purple-500' },
-                            ].map((s, i) => (
-                                <div key={i} className="space-y-2">
-                                    <div className="flex justify-between items-center text-sm">
-                                        <div className="flex items-center gap-3 text-jual-text-muted">
-                                            <s.icon className="w-4 h-4" /> {s.name}
-                                        </div>
-                                        <span className="font-bold text-jual-text-main">{s.value}</span>
-                                    </div>
-                                    <div className="h-1.5 w-full bg-jual-bg-alt rounded-full overflow-hidden border border-jual-border/50">
-                                        <div className={`h-full ${s.color}`} style={{ width: s.value }}></div>
-                                    </div>
-                                </div>
-                            ))}
+                    {/* AI Suggestions */}
+                    <div className="bg-jual-card border border-jual-border rounded-3xl p-8 h-fit">
+                        <div className="flex items-center gap-3 mb-6">
+                            <Sparkles className="w-6 h-6 text-amber-500" />
+                            <h3 className="text-lg font-bold text-jual-text-main">Saran Peningkatan AI</h3>
                         </div>
-
-                        <div className="mt-10 p-5 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
-                            <p className="text-[11px] text-emerald-400 font-bold uppercase tracking-widest mb-1">{t('ai_recommendation')}</p>
-                            <p className="text-xs text-jual-text-muted leading-relaxed italic">
-                                "{t('ai_rec_desc')}"
+                        
+                        {analysis.suggestions && analysis.suggestions.length > 0 ? (
+                            <ul className="space-y-4">
+                                {analysis.suggestions.map((sug, i) => (
+                                    <li key={i} className="text-sm text-jual-text-muted flex items-start gap-3 p-4 bg-jual-bg-alt rounded-2xl border border-jual-border/50">
+                                        <span className="text-emerald-500 font-bold mt-0.5">•</span> 
+                                        <span>{sug}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-sm text-jual-text-muted italic">Tidak ada saran AI yang tersedia.</p>
+                        )}
+                        
+                        <div className="mt-8 p-5 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
+                            <p className="text-[11px] text-emerald-500 font-bold uppercase tracking-widest mb-1">Status Optimasi</p>
+                            <p className="text-xs text-jual-text-muted leading-relaxed">
+                                Terapkan saran AI ini pada copywriting dan struktur halaman untuk meningkatkan rasio konversi Anda secara signifikan.
                             </p>
                         </div>
                     </div>

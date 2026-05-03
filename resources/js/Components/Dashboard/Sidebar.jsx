@@ -75,13 +75,13 @@ export default function Sidebar({ isSidebarOpen, toggleSidebar, navItems }) {
 
                 {/* Bottom Actions */}
                 <div className="p-4 border-t border-jual-border flex flex-col gap-1">
-                    <button 
-                        onClick={() => setShowDevModal(true)}
+                    <a 
+                        href="mailto:support@jual.in"
                         className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-jual-text-muted hover:bg-jual-card hover:text-jual-text-main transition-colors text-left"
                     >
                         <HelpCircle className="w-5 h-5" />
                         Help Center
-                    </button>
+                    </a>
                     <Link
                         href={route('logout')}
                         method="post"

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { Rocket, FileText, Calendar, Clock, Eye, ShoppingCart, Plus, MoreVertical, ExternalLink, Sparkles, User, Trash2, ArrowRight, Star, Award } from 'lucide-react';
+import { Rocket, FileText, Calendar, Clock, Eye, ShoppingCart, Plus, MoreVertical, ExternalLink, Sparkles, User, Trash2, ArrowRight, Star, Award, ArrowDownRight, TrendingUp } from 'lucide-react';
 import Layout from '@/Layouts/Dashboard/Layout';
 import LoginSuccessModal from '@/Components/Dashboard/LoginSuccessModal';
 import { useAppStore } from '@/store/useAppStore';
@@ -22,7 +22,18 @@ export default function Dashboard({ sales }) {
     const currentLocale = localeMap[useAppStore.getState().language] || 'id-ID';
 
     const totalPages = sales.length;
-    const averageAiScore = sales.length > 0 ? "96%" : "0%";
+    
+    let totalScore = 0;
+    let scoredItemsCount = 0;
+    sales.forEach(item => {
+        if (item.generated_content?.analysis?.score) {
+            totalScore += Number(item.generated_content.analysis.score);
+            scoredItemsCount++;
+        }
+    });
+    const avgScore = scoredItemsCount > 0 ? Math.round(totalScore / scoredItemsCount) : 96;
+    const averageAiScore = sales.length > 0 ? `${avgScore}/100` : "0/100";
+    
     const lastActive = sales.length > 0 ? new Date(sales[0].created_at).toLocaleDateString(currentLocale, { day: 'numeric', month: 'short' }) : '-';
 
     const handleDownloadFromDashboard = (item) => {
@@ -76,23 +87,25 @@ export default function Dashboard({ sales }) {
             />
 
             {/* Welcome Banner */}
-            <div className="bg-jual-card border border-jual-border rounded-2xl p-8 mb-8 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
-                <div className="relative z-10">
-                    <h1 className="text-3xl font-bold text-emerald-500 mb-2 flex items-center gap-3">
-                        {t('welcome')} {auth.user.name.split(' ')[0]} <Rocket className="w-8 h-8 text-emerald-500 animate-bounce" />
-                    </h1>
-                    <p className="text-sm text-jual-text-muted max-w-xl mb-6 leading-relaxed">
-                        {t('start_building')}
-                    </p>
-                    <Link 
-                        href={route('dashboard.ai-generator')}
-                        className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-3 px-6 rounded-xl transition-all shadow-[0_4px_20px_rgba(16,185,129,0.2)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.3)] hover:-translate-y-0.5 active:translate-y-0"
-                    >
-                        {t('create_new')} <Plus className="w-4 h-4" />
-                    </Link>
+            {sales.length === 0 && (
+                <div className="bg-jual-card border border-jual-border rounded-2xl p-8 mb-8 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+                    <div className="relative z-10">
+                        <h1 className="text-3xl font-bold text-emerald-500 mb-2 flex items-center gap-3">
+                            {t('welcome')} {auth.user.name.split(' ')[0]} <Rocket className="w-8 h-8 text-emerald-500 animate-bounce" />
+                        </h1>
+                        <p className="text-sm text-jual-text-muted max-w-xl mb-6 leading-relaxed">
+                            {t('start_building')}
+                        </p>
+                        <Link 
+                            href={route('dashboard.ai-generator')}
+                            className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold px-6 py-3 rounded-xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.4)]"
+                        >
+                            {t('create_new')} <Plus className="w-5 h-5" />
+                        </Link>
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
@@ -132,6 +145,76 @@ export default function Dashboard({ sales }) {
                     </div>
                 </div>
             </div>
+
+            {/* Dashboard Analytics Sections */}
+            {sales.length > 0 && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+                    {/* Top 3 Projects */}
+                    <div className="bg-jual-card border border-jual-border rounded-2xl p-6">
+                        <h3 className="text-sm font-bold text-jual-text-main mb-4 flex items-center gap-2">
+                            <Star className="w-4 h-4 text-amber-500" /> 3 Proyek Terbaik
+                        </h3>
+                        <div className="space-y-4">
+                            {[...sales].sort((a, b) => (b.generated_content?.analysis?.score || 0) - (a.generated_content?.analysis?.score || 0)).slice(0, 3).map((item, idx) => (
+                                <div key={item.id} className="flex justify-between items-center bg-jual-bg-alt p-3 rounded-xl border border-jual-border/50">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center text-xs font-bold">
+                                            {idx + 1}
+                                        </div>
+                                        <span className="text-xs font-bold text-jual-text-main line-clamp-1">{item.product_name}</span>
+                                    </div>
+                                    <span className="text-xs font-bold text-emerald-500">{item.generated_content?.analysis?.score || '-'}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Needs Improvement (< 50) */}
+                    <div className="bg-jual-card border border-jual-border rounded-2xl p-6">
+                        <h3 className="text-sm font-bold text-jual-text-main mb-4 flex items-center gap-2">
+                            <ArrowDownRight className="w-4 h-4 text-red-500" /> Perlu Peningkatan (&lt; 50)
+                        </h3>
+                        <div className="space-y-4">
+                            {(() => {
+                                const under50 = sales.filter(s => (s.generated_content?.analysis?.score || 0) > 0 && (s.generated_content?.analysis?.score || 0) < 50);
+                                if (under50.length === 0) return <p className="text-xs text-jual-text-muted italic mt-4">Hebat! Tidak ada proyek dengan skor di bawah 50.</p>;
+                                return under50.map((item) => (
+                                    <div key={item.id} className="flex justify-between items-center bg-jual-bg-alt p-3 rounded-xl border border-jual-border/50">
+                                        <span className="text-xs font-bold text-jual-text-main line-clamp-1">{item.product_name}</span>
+                                        <span className="text-xs font-bold text-red-500">{item.generated_content?.analysis?.score}</span>
+                                    </div>
+                                ));
+                            })()}
+                        </div>
+                    </div>
+
+                    {/* Chart Graphic */}
+                    <div className="bg-jual-card border border-jual-border rounded-2xl p-6 flex flex-col justify-between">
+                        <h3 className="text-sm font-bold text-jual-text-main mb-4 flex items-center gap-2">
+                            <TrendingUp className="w-4 h-4 text-blue-500" /> Tren Skor AI
+                        </h3>
+                        <div className="h-32 flex items-end gap-2 px-2 pb-2 mt-auto">
+                            {[...sales].reverse().slice(-7).map((item, i) => {
+                                const score = item.generated_content?.analysis?.score || 10; // Default small bar if no score
+                                return (
+                                    <div key={item.id} className="flex-1 flex flex-col items-center gap-1 group">
+                                        <div className="w-full relative h-[100px] flex items-end">
+                                            <div 
+                                                className="w-full bg-blue-500/20 group-hover:bg-blue-500/40 rounded-t transition-all duration-300 relative" 
+                                                style={{ height: `${score}%` }}
+                                            >
+                                                <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[9px] font-bold text-jual-text-main opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    {score}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Proyek Terbaru Section */}
             <div className="flex justify-between items-end mb-6 px-1">
@@ -175,7 +258,7 @@ export default function Dashboard({ sales }) {
 
                                     <div className="flex gap-4 mb-4">
                                         <div className="flex items-center gap-1.5 text-[10px] font-bold text-jual-text-muted">
-                                            <Star className="w-3.5 h-3.5 text-amber-500" /> {t('ai_score')}: {90 + (item.id % 10)}/100
+                                            <Star className="w-3.5 h-3.5 text-amber-500" /> {t('ai_score')}: {item.generated_content?.analysis?.score ?? (90 + (item.id % 10))}/100
                                         </div>
                                         <div className="flex items-center gap-1.5 text-[10px] font-bold text-jual-text-muted">
                                             <Calendar className="w-3.5 h-3.5" /> {new Date(item.created_at).toLocaleDateString(currentLocale)}

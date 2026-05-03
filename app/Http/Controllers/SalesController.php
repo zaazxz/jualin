@@ -40,6 +40,20 @@ class SalesController extends Controller
     }
 
     /**
+     * Display analytics.
+     */
+    public function analytics()
+    {
+        $sales = Sales::where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return Inertia::render('Dashboard/Analytics', [
+            'sales' => $sales
+        ]);
+    }
+
+    /**
      * Generate AI content and templates.
      */
     public function generate(Request $request, GeminiService $gemini)
@@ -55,6 +69,7 @@ class SalesController extends Controller
             'brand_color' => 'nullable|string',
             'features' => 'nullable|string',
             'price' => 'nullable|string',
+            'language' => 'nullable|string',
         ]);
 
         $result = $gemini->generateSalesContent(
@@ -65,7 +80,8 @@ class SalesController extends Controller
             $validated['web_name'] ?? null,
             $validated['brand_color'] ?? null,
             $validated['features'] ?? null,
-            $validated['price'] ?? null
+            $validated['price'] ?? null,
+            $validated['language'] ?? 'id'
         );
 
         if (!$result['success']) {
@@ -152,5 +168,22 @@ class SalesController extends Controller
         $sales->delete();
 
         return redirect()->back()->with('success', 'Halaman berhasil dihapus!');
+    }
+
+    /**
+     * Get daily AI insight
+     */
+    public function dailyInsight(Request $request, GeminiService $gemini)
+    {
+        $language = $request->input('language', 'id');
+        $userName = Auth::user()->name;
+
+        $insight = $gemini->generateDailyInsight($language, $userName);
+
+        if (!$insight) {
+            return response()->json(['error' => 'Failed to generate insight'], 500);
+        }
+
+        return response()->json($insight);
     }
 }
